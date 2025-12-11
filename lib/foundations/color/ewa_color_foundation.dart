@@ -59,27 +59,54 @@ class EwaColorFoundation {
   }
 
   // Get primary color based on theme
+  /// Gets the primary color from the app's ColorScheme or fallback to EWA Kit default
   static Color getPrimary(BuildContext context) {
-    return resolveColor(context, primaryLight, primaryDark);
+    // Try to get from app's ColorScheme first
+    try {
+      return Theme.of(context).colorScheme.primary;
+    } catch (_) {
+      // Fallback to EWA Kit default colors
+      return resolveColor(context, primaryLight, primaryDark);
+    }
   }
 
   // Get secondary color based on theme
+  /// Gets the secondary color from the app's ColorScheme or fallback to EWA Kit default
   static Color getSecondary(BuildContext context) {
-    return resolveColor(context, secondaryLight, secondaryDark);
+    try {
+      return Theme.of(context).colorScheme.secondary;
+    } catch (_) {
+      return resolveColor(context, secondaryLight, secondaryDark);
+    }
   }
 
   // Get error color based on theme
+  /// Gets the error color from the app's ColorScheme or fallback to EWA Kit default
   static Color getError(BuildContext context) {
-    return resolveColor(context, errorLight, errorDark);
+    try {
+      return Theme.of(context).colorScheme.error;
+    } catch (_) {
+      return resolveColor(context, errorLight, errorDark);
+    }
   }
 
   // Get text color based on theme
+  /// Gets the text color from the app's ColorScheme or fallback to EWA Kit default
   static Color getText(BuildContext context) {
-    return resolveColor(context, textLight, textDark);
+    try {
+      return Theme.of(context).colorScheme.onSurface;
+    } catch (_) {
+      return resolveColor(context, textLight, textDark);
+    }
   }
 
   // Get background color based on theme
+  /// Gets the background color from the app's ColorScheme or fallback to EWA Kit default
   static Color getBackground(BuildContext context) {
-    return resolveColor(context, backgroundLight, backgroundDark);
+    try {
+      return Theme.of(context).colorScheme.surface;
+    } catch (_) {
+      return resolveColor(context, backgroundLight, backgroundDark);
+    }
   }
 }

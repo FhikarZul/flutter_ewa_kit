@@ -15,7 +15,7 @@ enum EwaButtonVariant {
       outlineBorderColor: EwaColorFoundation.getPrimary(context),
       borderColor: EwaColorFoundation.getPrimary(context),
       outlineFgColor: EwaColorFoundation.getPrimary(context),
-      foregroundColor: Colors.white,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary, // Adapts to ColorScheme
     ),
     secondary => ButtonVariantData(
       backgroundColor: EwaColorFoundation.getSecondary(context),
@@ -23,7 +23,7 @@ enum EwaButtonVariant {
       outlineBorderColor: EwaColorFoundation.getSecondary(context),
       borderColor: EwaColorFoundation.getSecondary(context),
       outlineFgColor: EwaColorFoundation.getSecondary(context),
-      foregroundColor: Colors.white,
+      foregroundColor: Theme.of(context).colorScheme.onSecondary, // Adapts to ColorScheme
     ),
     tertiary => ButtonVariantData(
       backgroundColor: EwaColorFoundation.resolveColor(
@@ -59,7 +59,7 @@ enum EwaButtonVariant {
       outlineBorderColor: EwaColorFoundation.getError(context),
       borderColor: EwaColorFoundation.getError(context),
       outlineFgColor: EwaColorFoundation.getError(context),
-      foregroundColor: Colors.white,
+      foregroundColor: Theme.of(context).colorScheme.onError, // Adapts to ColorScheme
     ),
   };
 }
