@@ -13,6 +13,16 @@ A comprehensive Flutter UI component library with a robust design system that su
 - 🔧 **Highly Configurable** - Extensive customization options
 - 🔄 **Custom Border Radius** - Configure corner rounding for buttons and text fields
 - ✅ **Built-in Validators** - Reusable validation functions for form fields
+- 💰 **Currency Formatter** - Indonesian currency formatting for text fields
+- 🗓️ **DateTime Converter** - Date/time parsing and formatting with Indonesian localization
+- 📋 **Dialog Components** - Alert, confirmation, and custom dialogs
+- 📝 **Toast Notifications** - Success, error, info, and warning notifications
+- ⏳ **Loading Indicators** - Multiple animated loading components
+- 📊 **Lazy Load** - Infinite scroll pagination component
+- 📤 **HTTP Client** - Advanced networking with Dio, token management, and file download
+- 📱 **Bottom Sheets** - Modal bottom sheets with customizable content
+- 📚 **Typography System** - Consistent text styles and hierarchy
+- 🎨 **Color Foundation** - Light and dark theme color palette
 
 ## Table of Contents
 
@@ -21,6 +31,15 @@ A comprehensive Flutter UI component library with a robust design system that su
 - [Components](#components)
   - [Buttons](#buttons)
   - [TextFields](#textfields)
+  - [Dialogs](#dialogs)
+  - [Toast Notifications](#toast-notifications)
+  - [Loading Indicators](#loading-indicators)
+  - [Bottom Sheets](#bottom-sheets)
+  - [Lazy Load](#lazy-load)
+- [Utilities](#utilities)
+  - [DateTime Converter](#datetime-converter)
+  - [HTTP Client](#http-client)
+  - [Logging](#logging)
 - [Customization](#customization)
 - [Dark Mode](#dark-mode)
 - [Examples](#examples)
@@ -451,6 +470,284 @@ Available validators include:
 - `creditCard` - Validates credit card number
 - `combine` - Allows combining multiple validators
 
+#### Currency Formatter
+
+EWA Kit includes a currency formatter for Indonesian financial applications:
+
+```dart
+// Currency formatted TextField
+EwaTextField.primary(
+  hintText: 'Amount',
+  formatter: (value) => EwaFormatters.currencyFormatter(value),
+  keyboardType: TextInputType.number,
+);
+```
+
+### Dialogs
+
+EWA Kit provides multiple dialog types for different use cases:
+
+```dart
+// Alert dialog
+EwaDialog.showAlert(
+  context: context,
+  title: 'Alert',
+  message: 'This is an alert message',
+);
+
+// Confirmation dialog
+final result = await EwaDialog.showConfirmation(
+  context: context,
+  title: 'Confirm',
+  message: 'Are you sure you want to proceed?',
+);
+
+if (result == true) {
+  // User confirmed
+} else {
+  // User cancelled
+}
+
+// Custom dialog with actions
+EwaDialog.show(
+  context: context,
+  title: 'Custom Dialog',
+  message: 'This is a custom dialog with custom actions.',
+  primaryAction: EwaDialogAction(
+    label: 'OK',
+    onPressed: () => Navigator.pop(context),
+  ),
+  secondaryAction: EwaDialogAction(
+    label: 'Cancel',
+    onPressed: () => Navigator.pop(context),
+  ),
+  tertiaryAction: EwaDialogAction(
+    label: 'More',
+    onPressed: () {
+      // Custom action
+    },
+  ),
+);
+```
+
+### Toast Notifications
+
+Display temporary messages to users with different styles:
+
+```dart
+// Success toast
+EwaToast.showSuccess(context, 'Operation completed successfully!');
+
+// Error toast
+EwaToast.showError(context, 'Something went wrong!');
+
+// Info toast
+EwaToast.showInfo(context, 'This is an information message.');
+
+// Warning toast
+EwaToast.showWarning(context, 'This is a warning message!');
+```
+
+### Loading Indicators
+
+Multiple animated loading indicators for different contexts:
+
+```dart
+// Bouncing dots loader
+EwaLoading.bouncingDots(size: 30);
+
+// Wave loader
+EwaLoading.wave(size: 30);
+
+// Circular progress loader
+EwaLoading.circularProgress(size: 30);
+
+// Pulse loader
+EwaLoading.pulse(size: 30);
+
+// Loader with label
+EwaLoading.bouncingDots(label: 'Loading data...', size: 40);
+```
+
+### Bottom Sheets
+
+Modal bottom sheets for presenting options or content:
+
+```dart
+// Options bottom sheet
+await EwaBottomSheet.showOptions(
+  context: context,
+  title: 'Choose an Option',
+  options: [
+    EwaBottomSheetOption(
+      title: 'Option 1',
+      subtitle: 'This is the first option',
+      onTap: () {
+        // Handle option 1
+      },
+    ),
+    EwaBottomSheetOption(
+      title: 'Option 2',
+      subtitle: 'This is the second option',
+      onTap: () {
+        // Handle option 2
+      },
+    ),
+  ],
+);
+
+// Custom bottom sheet
+await EwaBottomSheet.show(
+  context: context,
+  title: 'Custom Content',
+  content: Container(
+    padding: EdgeInsets.all(16.sp),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('This is custom content in the bottom sheet'),
+        const SizedBox(height: 16),
+        EwaTextField.primary(hintText: 'Enter some text'),
+      ],
+    ),
+  ),
+  actions: [
+    EwaBottomSheetAction(
+      label: 'Cancel',
+      onPressed: () => Navigator.pop(context),
+    ),
+    EwaBottomSheetAction(
+      label: 'Save',
+      onPressed: () {
+        Navigator.pop(context);
+        // Handle save
+      },
+    ),
+  ],
+);
+```
+
+### Lazy Load
+
+Infinite scroll pagination component for loading data progressively:
+
+```dart
+EwaLazyLoad(
+  page: 1,
+  totalPage: 3,
+  itemCount: 5,
+  itemBuilder: (context, index) {
+    return ListTile(
+      title: Text('Item ${index + 1}'),
+      subtitle: Text('Subtitle for item ${index + 1}'),
+    );
+  },
+  onChanged: (page) {
+    // Handle page change
+  },
+  isLoading: false,
+  onRefresh: () async {
+    // Handle refresh
+  },
+  emptyMessage: 'Tidak ada data tersedia',
+);
+```
+
+## Utilities
+
+### DateTime Converter
+
+Comprehensive date/time parsing and formatting utilities with Indonesian localization:
+
+```dart
+// Format to full date and time
+final formatted = EwaDateTimeConverter.formatToFullDateTime(DateTime.now());
+
+// Format to Indonesian date and time
+final indonesianFormatted = EwaDateTimeConverter.formatToFullIndonesianDateTime(DateTime.now());
+
+// Get time ago in English or Indonesian
+final timeAgo = EwaDateTimeConverter.getTimeAgo(DateTime.now().subtract(Duration(hours: 2)));
+final indonesianTimeAgo = EwaDateTimeConverter.getTimeAgo(DateTime.now().subtract(Duration(hours: 2)), useIndonesian: true);
+
+// Parse date string
+final parsedDate = EwaDateTimeConverter.parse("2023-12-25");
+
+// Calculate age
+final age = EwaDateTimeConverter.calculateAge(DateTime(1990, 1, 1));
+
+// Get Indonesian day/month names
+final dayName = EwaDateTimeConverter.getIndonesianDayName(DateTime.now());
+final monthName = EwaDateTimeConverter.getIndonesianMonthName(DateTime.now());
+```
+
+### HTTP Client
+
+Advanced HTTP client with token management, retry logic, and file download capabilities:
+
+```dart
+final httpClient = EwaHttpClient();
+
+// Initialize with base URL and default headers
+httpClient.init(
+  baseUrl: 'https://api.example.com',
+  defaultHeaders: {'Content-Type': 'application/json'},
+);
+
+// Set up token refresh callback
+httpClient.refreshTokenCallback = () async {
+  // Refresh tokens and return true if successful
+  return true;
+};
+
+// Set up logout callback
+httpClient.onLogout = () {
+  // Handle logout when token refresh fails
+};
+
+// Make GET request
+final response = await httpClient.get('/users/1');
+
+// Make POST request
+final response = await httpClient.post('/users', data: {'name': 'John'});
+
+// Download file
+final filePath = await httpClient.downloadFile(
+  'https://example.com/image.jpg',
+  '/path/to/save/image.jpg',
+  onProgress: (received, total) {
+    // Handle progress updates
+  },
+);
+
+// Download file with resume capability
+final filePath = await httpClient.downloadFileWithResume(
+  'https://example.com/large-file.zip',
+  '/path/to/save/large-file.zip',
+  onProgress: (received, total) {
+    // Handle progress updates
+  },
+);
+```
+
+### Logging
+
+Colored logging utility for debugging:
+
+```dart
+// Info log
+EwaLogger.info('This is an info message');
+
+// Warning log
+EwaLogger.warn('This is a warning message');
+
+// Error log
+EwaLogger.error('This is an error message');
+
+// Debug log
+EwaLogger.debug('This is a debug message');
+```
+
 ## Customization
 
 ### All Button Parameters
@@ -486,6 +783,7 @@ EwaTextField(
   onEditingComplete: () {},            // Optional: Editing complete callback
   onSubmitted: (value) {},             // Optional: Submit callback
   validator: (value) {},               // Optional: Validation function
+  formatter: (value) {},               // Optional: Text formatter function
   prefixIcon: const Icon(Icons.star),  // Optional: Prefix widget
   suffixIcon: const Icon(Icons.clear), // Optional: Suffix widget
   keyboardType: TextInputType.text,    // Optional: Keyboard type
@@ -643,6 +941,14 @@ Form(
       ),
       const SizedBox(height: 16),
 
+      // Currency field
+      EwaTextField.primary(
+        hintText: 'Amount',
+        formatter: (value) => EwaFormatters.currencyFormatter(value),
+        keyboardType: TextInputType.number,
+      ),
+      const SizedBox(height: 16),
+
       // Submit button
       EwaButton.primary(
         label: 'Submit',
@@ -706,6 +1012,8 @@ EWA Kit depends on the following packages:
 - `tap_debouncer` - Button debounce functionality
 - `flutter_spinkit` - Loading indicators
 - `gap` - Spacing utilities
+- `dio` - HTTP client
+- `path_provider` - File system access
 
 These are automatically installed when you add EWA Kit to your project.
 
