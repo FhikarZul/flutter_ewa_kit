@@ -111,6 +111,31 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+### 3. Initialize All EWA Kit Dependencies
+
+Some components in EWA Kit require additional initialization for optimal performance:
+
+```dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize EWA Kit
+  await EwaKit.initialize();
+
+  runApp(const MyApp());
+}
+```
+
+The `EwaKit.initialize()` method handles the initialization of all required dependencies including:
+
+- ScreenUtil configuration
+- Google Fonts loading
+- Default theme settings
+- Network client setup
+- Logger configuration
+
+This ensures all components work correctly and have access to the required resources.
+
 ## Components
 
 ### Buttons
