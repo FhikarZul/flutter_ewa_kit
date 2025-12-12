@@ -17,6 +17,10 @@ class EwaColorFoundation {
   static const Color errorDark = Color(0xFFF87171);
 
   // Neutral colors
+  static const Color neutral10 = Color(0xFFFAFAFA);
+  static const Color neutral20 = Color(0xFFF5F5F5);
+  static const Color neutral30 = Color(0xFFE5E5E5);
+  static const Color neutral40 = Color(0xFFD4D4D4);
   static const Color neutral50 = Color(0xFFFAFAFA);
   static const Color neutral100 = Color(0xFFF5F5F5);
   static const Color neutral200 = Color(0xFFE5E5E5);

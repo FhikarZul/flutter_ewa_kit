@@ -1,24 +1,50 @@
 name: ewa_kit
-description: "A new Flutter package project."
+description: "Template package for Flutter projects."
 version: 0.0.1
-homepage:
+homepage: https://github.com/ewa-mobile/ewa_kit
 
 environment:
   sdk: ^3.10.1
   flutter: ">=1.17.0"
 
 dependencies:
+  # Core Flutter SDK - Required for all Flutter packages
   flutter:
     sdk: flutter
+
+  # Responsive UI design across different screen sizes
   flutter_screenutil: ^5.9.3
+
+  # Easy integration of Google Fonts in the application
   google_fonts: ^6.3.3
+
+  # Prevents accidental double taps on UI elements
   tap_debouncer: ^2.2.0
+
+  # Collection of loading indicators and spinners
   flutter_spinkit: ^5.2.2
+
+  # Simple spacing widget for Flutter layouts
   gap: ^3.0.1
 
+  # Internationalization and localization utilities
+  intl: ^0.19.0
+
+  # Enhanced logging capabilities with colored output
+  logger: ^2.6.2
+
+  # HTTP client for making REST API requests
+  dio: ^5.7.0
+
+  # Path provider for accessing device directories
+  path_provider: ^2.1.5
+
 dev_dependencies:
+  # Part of the Flutter SDK testing framework
   flutter_test:
     sdk: flutter
+
+  # Static analysis rules for Flutter/Dart code
   flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the

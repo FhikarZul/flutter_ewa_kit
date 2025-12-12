@@ -1,6 +1,7 @@
 import 'package:ewa_kit/foundations/color/ewa_color_foundation.dart';
 import 'package:ewa_kit/foundations/size/size.dart';
 import 'package:ewa_kit/ui/textfield/enums/ewa_textfield_variant.dart';
+import 'package:ewa_kit/utils/ewa_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -50,6 +51,7 @@ class EwaTextField extends StatefulWidget {
     this.suffixIcon,
     this.keyboardType,
     this.textInputAction,
+    this.formatter,
     super.key,
   });
 
@@ -70,6 +72,7 @@ class EwaTextField extends StatefulWidget {
     Widget? suffixIcon,
     TextInputType? keyboardType,
     TextInputAction? textInputAction,
+    String Function(String)? formatter,
   }) => EwaTextField(
     controller: controller,
     hintText: hintText,
@@ -87,6 +90,7 @@ class EwaTextField extends StatefulWidget {
     suffixIcon: suffixIcon,
     keyboardType: keyboardType,
     textInputAction: textInputAction,
+    formatter: formatter,
   );
 
   /// Creates a secondary variant TextField
@@ -106,6 +110,7 @@ class EwaTextField extends StatefulWidget {
     Widget? suffixIcon,
     TextInputType? keyboardType,
     TextInputAction? textInputAction,
+    String Function(String)? formatter,
   }) => EwaTextField(
     controller: controller,
     hintText: hintText,
@@ -123,6 +128,7 @@ class EwaTextField extends StatefulWidget {
     suffixIcon: suffixIcon,
     keyboardType: keyboardType,
     textInputAction: textInputAction,
+    formatter: formatter,
   );
 
   /// Creates a tertiary variant TextField
@@ -142,6 +148,7 @@ class EwaTextField extends StatefulWidget {
     Widget? suffixIcon,
     TextInputType? keyboardType,
     TextInputAction? textInputAction,
+    String Function(String)? formatter,
   }) => EwaTextField(
     controller: controller,
     hintText: hintText,
@@ -159,6 +166,7 @@ class EwaTextField extends StatefulWidget {
     suffixIcon: suffixIcon,
     keyboardType: keyboardType,
     textInputAction: textInputAction,
+    formatter: formatter,
   );
 
   /// Creates a danger variant TextField
@@ -178,6 +186,7 @@ class EwaTextField extends StatefulWidget {
     Widget? suffixIcon,
     TextInputType? keyboardType,
     TextInputAction? textInputAction,
+    String Function(String)? formatter,
   }) => EwaTextField(
     controller: controller,
     hintText: hintText,
@@ -195,6 +204,7 @@ class EwaTextField extends StatefulWidget {
     suffixIcon: suffixIcon,
     keyboardType: keyboardType,
     textInputAction: textInputAction,
+    formatter: formatter,
   );
 
   final TextEditingController? controller;
@@ -213,6 +223,7 @@ class EwaTextField extends StatefulWidget {
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final String Function(String)? formatter;
 
   @override
   State<EwaTextField> createState() => _EwaTextFieldState();
@@ -220,19 +231,67 @@ class EwaTextField extends StatefulWidget {
 
 class _EwaTextFieldState extends State<EwaTextField> {
   late TextEditingController _controller;
+  late FocusNode _focusNode;
+  bool _isFormatting = false;
 
   @override
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
+    _focusNode = FocusNode();
+
+    // Add focus listeners
+    _focusNode.addListener(_onFocusChange);
+
+    // Apply formatter if provided
+    if (widget.formatter != null) {
+      _controller.addListener(_formatText);
+    }
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
     if (widget.controller == null) {
       _controller.dispose();
     }
     super.dispose();
+  }
+
+  /// Handles focus change events
+  void _onFocusChange() {
+    if (_focusNode.hasFocus) {
+      EwaLogger.debug('TextField focused: ${widget.hintText ?? 'Untitled'}');
+    } else {
+      EwaLogger.debug('TextField unfocused: ${widget.hintText ?? 'Untitled'}');
+    }
+  }
+
+  /// Applies formatting to the text field content
+  void _formatText() {
+    if (widget.formatter == null || _isFormatting) return;
+
+    final originalText = _controller.text;
+    final formattedText = widget.formatter!(originalText);
+
+    // Only update if the text has changed
+    if (originalText != formattedText) {
+      setState(() {
+        _isFormatting = true;
+      });
+
+      try {
+        _controller.value = TextEditingValue(
+          text: formattedText,
+          selection: TextSelection.collapsed(offset: formattedText.length),
+        );
+      } finally {
+        setState(() {
+          _isFormatting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -241,11 +300,20 @@ class _EwaTextFieldState extends State<EwaTextField> {
 
     return TextFormField(
       controller: _controller,
+      focusNode: _focusNode,
       obscureText: widget.obscureText,
       enabled: widget.enabled,
       readOnly: widget.readOnly,
       maxLines: widget.maxLines,
-      onChanged: widget.onChanged,
+      onChanged: widget.onChanged != null
+          ? (value) {
+              // Log text input event
+              EwaLogger.debug('TextField input: $value');
+
+              // Execute the original onChanged callback
+              widget.onChanged!(value);
+            }
+          : null,
       onEditingComplete: widget.onEditingComplete,
       onFieldSubmitted: widget.onSubmitted,
       validator: widget.validator,

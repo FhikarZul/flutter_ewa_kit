@@ -1,4 +1,5 @@
 import 'package:ewa_kit/foundations/size/size.dart';
+import 'package:ewa_kit/utils/ewa_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -238,7 +239,15 @@ class _ButtonWidget extends StatelessWidget {
       height: size.data.height,
       child: MaterialButton(
         minWidth: size.data.width,
-        onPressed: (enable && onPressed != null) ? onPressed : null,
+        onPressed: (enable && onPressed != null)
+            ? () async {
+                // Log button press event
+                EwaLogger.info('Button pressed: $label');
+
+                // Execute the original onPressed callback
+                await onPressed!();
+              }
+            : null,
         elevation: 0,
         disabledElevation: 0,
         highlightElevation: 0,
