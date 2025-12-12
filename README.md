@@ -11,6 +11,8 @@ A comprehensive Flutter UI component library with a robust design system that su
 - 📏 **Flexible Sizing** - Five size options (xs, sm, md, lg, xl)
 - ⚡ **Debounce Support** - Prevent multiple rapid clicks
 - 🔧 **Highly Configurable** - Extensive customization options
+- 🔄 **Custom Border Radius** - Configure corner rounding for buttons and text fields
+- ✅ **Built-in Validators** - Reusable validation functions for form fields
 
 ## Table of Contents
 
@@ -18,6 +20,7 @@ A comprehensive Flutter UI component library with a robust design system that su
 - [Setup](#setup)
 - [Components](#components)
   - [Buttons](#buttons)
+  - [TextFields](#textfields)
 - [Customization](#customization)
 - [Dark Mode](#dark-mode)
 - [Examples](#examples)
@@ -267,6 +270,187 @@ EwaButton.primary(
 );
 ```
 
+#### Custom Border Radius
+
+```dart
+// Rounded corners (20.0 radius)
+EwaButton.primary(
+  label: 'Rounded Button',
+  borderRadius: 20.0,
+  onPressed: () async {},
+);
+
+// Pill-shaped button (30.0 radius)
+EwaButton.secondary(
+  label: 'Pill Button',
+  borderRadius: 30.0,
+  onPressed: () async {},
+);
+
+// Square corners (0.0 radius)
+EwaButton.danger(
+  label: 'Square Button',
+  borderRadius: 0.0,
+  onPressed: () async {},
+);
+```
+
+### TextFields
+
+EWA Kit provides customizable TextField components with multiple variants and built-in validation.
+
+#### TextField Variants
+
+```dart
+// Primary TextField (main inputs)
+EwaTextField.primary(
+  hintText: 'Enter your name',
+  onChanged: (value) {
+    // Handle text change
+  },
+);
+
+// Secondary TextField (alternative inputs)
+EwaTextField.secondary(
+  hintText: 'Enter your email',
+  onChanged: (value) {
+    // Handle text change
+  },
+);
+
+// Tertiary TextField (less prominent inputs)
+EwaTextField.tertiary(
+  hintText: 'Enter your phone',
+  onChanged: (value) {
+    // Handle text change
+  },
+);
+
+// Danger TextField (error states)
+EwaTextField.danger(
+  hintText: 'Enter your password',
+  onChanged: (value) {
+    // Handle text change
+  },
+);
+```
+
+#### TextField with Icons
+
+```dart
+// Prefix icon
+EwaTextField.primary(
+  hintText: 'Password',
+  prefixIcon: const Icon(Icons.lock),
+  obscureText: true,
+  onChanged: (value) {
+    // Handle text change
+  },
+);
+
+// Suffix icon
+EwaTextField.primary(
+  hintText: 'Search',
+  suffixIcon: const Icon(Icons.search),
+  onChanged: (value) {
+    // Handle text change
+  },
+);
+```
+
+#### Custom Border Radius
+
+```dart
+// Rounded corners (20.0 radius)
+EwaTextField.primary(
+  hintText: 'Rounded TextField',
+  borderRadius: 20.0,
+);
+
+// Pill-shaped TextField (30.0 radius)
+EwaTextField.secondary(
+  hintText: 'Pill TextField',
+  borderRadius: 30.0,
+);
+
+// Square corners (0.0 radius)
+EwaTextField.tertiary(
+  hintText: 'Square TextField',
+  borderRadius: 0.0,
+);
+```
+
+#### TextField Validation
+
+EWA Kit includes a comprehensive set of reusable validators:
+
+```dart
+// Required field validation
+EwaTextField.primary(
+  hintText: 'Name (Required)',
+  validator: EwaValidators.required,
+);
+
+// Email validation
+EwaTextField.primary(
+  hintText: 'Email',
+  validator: (value) => EwaValidators.combine([
+    EwaValidators.required,
+    EwaValidators.email,
+  ], value),
+);
+
+// Password validation
+EwaTextField.primary(
+  hintText: 'Password',
+  obscureText: true,
+  validator: EwaValidators.password,
+);
+
+// Phone number validation
+EwaTextField.secondary(
+  hintText: 'Phone Number',
+  validator: EwaValidators.phoneNumber,
+);
+
+// Numeric validation with min/max
+EwaTextField.tertiary(
+  hintText: 'Age (18-100)',
+  validator: (value) => EwaValidators.combine([
+    EwaValidators.required,
+    EwaValidators.numeric,
+    (val) => EwaValidators.min(18, val),
+    (val) => EwaValidators.max(100, val),
+  ], value),
+);
+
+// Length validation
+EwaTextField.primary(
+  hintText: 'Username (3-20 chars)',
+  validator: (value) => EwaValidators.combine([
+    EwaValidators.required,
+    (val) => EwaValidators.minLength(3, val),
+    (val) => EwaValidators.maxLength(20, val),
+  ], value),
+);
+```
+
+Available validators include:
+
+- `required` - Checks if a field is not empty
+- `email` - Validates email format
+- `minLength` - Validates minimum character length
+- `maxLength` - Validates maximum character length
+- `exactLength` - Validates exact character length
+- `password` - Validates password strength
+- `phoneNumber` - Validates phone number format
+- `numeric` - Validates numeric input
+- `min` - Validates minimum numeric value
+- `max` - Validates maximum numeric value
+- `url` - Validates URL format
+- `creditCard` - Validates credit card number
+- `combine` - Allows combining multiple validators
+
 ## Customization
 
 ### All Button Parameters
@@ -283,6 +467,29 @@ EwaButton(
   wrap: true,                          // Optional: Wrap content or full width
   leading: const Icon(Icons.star),     // Optional: Leading widget
   trailing: const Icon(Icons.arrow),   // Optional: Trailing widget
+  borderRadius: 8.0,                   // Optional: Custom border radius
+);
+```
+
+### All TextField Parameters
+
+```dart
+EwaTextField(
+  hintText: 'Placeholder text',        // Optional: Placeholder text
+  variant: EwaTextFieldVariant.primary,// Optional: TextField variant
+  borderRadius: 8.0,                   // Optional: Custom border radius
+  obscureText: false,                  // Optional: Hide text (passwords)
+  enabled: true,                       // Optional: Enable/disable field
+  readOnly: false,                     // Optional: Read-only field
+  maxLines: 1,                         // Optional: Multi-line support
+  onChanged: (value) {},               // Optional: Change callback
+  onEditingComplete: () {},            // Optional: Editing complete callback
+  onSubmitted: (value) {},             // Optional: Submit callback
+  validator: (value) {},               // Optional: Validation function
+  prefixIcon: const Icon(Icons.star),  // Optional: Prefix widget
+  suffixIcon: const Icon(Icons.clear), // Optional: Suffix widget
+  keyboardType: TextInputType.text,    // Optional: Keyboard type
+  textInputAction: TextInputAction.done,// Optional: Input action
 );
 ```
 
@@ -309,6 +516,15 @@ EwaButton.tertiary(
   size: EwaButtonSize.sm,
   onPressed: () async {
     // Handle cancel
+  },
+);
+
+// Rounded primary button
+EwaButton.primary(
+  label: 'Rounded Button',
+  borderRadius: 20.0,
+  onPressed: () async {
+    // Handle action
   },
 );
 ```
@@ -386,6 +602,58 @@ Column(
       onPressed: () async {},
     ),
   ],
+)
+```
+
+### Form Example with Validation
+
+```dart
+final _formKey = GlobalKey<FormState>();
+
+Form(
+  key: _formKey,
+  child: Column(
+    children: [
+      // Name field
+      EwaTextField.primary(
+        hintText: 'Full Name',
+        validator: (value) => EwaValidators.combine([
+          EwaValidators.required,
+          (val) => EwaValidators.minLength(2, val),
+        ], value),
+      ),
+      const SizedBox(height: 16),
+
+      // Email field
+      EwaTextField.secondary(
+        hintText: 'Email Address',
+        validator: (value) => EwaValidators.combine([
+          EwaValidators.required,
+          EwaValidators.email,
+        ], value),
+      ),
+      const SizedBox(height: 16),
+
+      // Password field
+      EwaTextField.primary(
+        hintText: 'Password',
+        obscureText: true,
+        prefixIcon: const Icon(Icons.lock),
+        validator: EwaValidators.password,
+      ),
+      const SizedBox(height: 16),
+
+      // Submit button
+      EwaButton.primary(
+        label: 'Submit',
+        onPressed: () async {
+          if (_formKey.currentState!.validate()) {
+            // Process form data
+          }
+        },
+      ),
+    ],
+  ),
 )
 ```
 

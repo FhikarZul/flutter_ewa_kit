@@ -37,6 +37,7 @@ class EwaButton extends StatelessWidget {
   const EwaButton({
     required this.label,
     this.size = EwaButtonSize.md,
+    this.borderRadius,
     this.onPressed,
     this.variant = EwaButtonVariant.primary,
     this.type = EwaButtonType.filled,
@@ -51,6 +52,7 @@ class EwaButton extends StatelessWidget {
   factory EwaButton.primary({
     required String label,
     EwaButtonType type = EwaButtonType.filled,
+    double? borderRadius,
     bool enable = true,
     Future<void> Function()? onPressed,
     EwaButtonSize size = EwaButtonSize.md,
@@ -61,6 +63,7 @@ class EwaButton extends StatelessWidget {
   }) => EwaButton(
     label: label,
     size: size,
+    borderRadius: borderRadius,
     type: type,
     enable: enable,
     onPressed: onPressed,
@@ -73,6 +76,7 @@ class EwaButton extends StatelessWidget {
   factory EwaButton.secondary({
     required String label,
     EwaButtonType type = EwaButtonType.filled,
+    double? borderRadius,
     bool enable = true,
     Future<void> Function()? onPressed,
     EwaButtonSize size = EwaButtonSize.md,
@@ -84,6 +88,7 @@ class EwaButton extends StatelessWidget {
     variant: EwaButtonVariant.secondary,
     label: label,
     size: size,
+    borderRadius: borderRadius,
     type: type,
     enable: enable,
     onPressed: onPressed,
@@ -96,6 +101,7 @@ class EwaButton extends StatelessWidget {
   factory EwaButton.tertiary({
     required String label,
     EwaButtonType type = EwaButtonType.filled,
+    double? borderRadius,
     bool enable = true,
     Future<void> Function()? onPressed,
     EwaButtonSize size = EwaButtonSize.md,
@@ -107,6 +113,7 @@ class EwaButton extends StatelessWidget {
     variant: EwaButtonVariant.tertiary,
     label: label,
     size: size,
+    borderRadius: borderRadius,
     type: type,
     enable: enable,
     onPressed: onPressed,
@@ -119,6 +126,7 @@ class EwaButton extends StatelessWidget {
   factory EwaButton.danger({
     required String label,
     EwaButtonType type = EwaButtonType.filled,
+    double? borderRadius,
     bool enable = true,
     Future<void> Function()? onPressed,
     EwaButtonSize size = EwaButtonSize.md,
@@ -130,6 +138,7 @@ class EwaButton extends StatelessWidget {
     variant: EwaButtonVariant.danger,
     label: label,
     size: size,
+    borderRadius: borderRadius,
     type: type,
     enable: enable,
     onPressed: onPressed,
@@ -142,6 +151,7 @@ class EwaButton extends StatelessWidget {
   final bool enable;
   final String label;
   final EwaButtonSize size;
+  final double? borderRadius;
   final EwaButtonVariant variant;
   final Future<void> Function()? onPressed;
   final EwaButtonType type;
@@ -159,6 +169,7 @@ class EwaButton extends StatelessWidget {
             enable: false,
             label: label,
             size: size,
+            borderRadius: borderRadius,
             variant: variant,
             type: type,
             leading: SpinKitCircle(
@@ -173,6 +184,7 @@ class EwaButton extends StatelessWidget {
             enable: enable,
             label: label,
             size: size,
+            borderRadius: borderRadius,
             variant: variant,
             type: type,
             onPressed: onTap,
@@ -185,6 +197,7 @@ class EwaButton extends StatelessWidget {
           enable: enable,
           label: label,
           size: size,
+          borderRadius: borderRadius,
           variant: variant,
           type: type,
           onPressed: onPressed,
@@ -201,6 +214,7 @@ class _ButtonWidget extends StatelessWidget {
     required this.size,
     required this.variant,
     required this.type,
+    this.borderRadius,
     this.onPressed,
     this.leading,
     this.trailing,
@@ -210,6 +224,7 @@ class _ButtonWidget extends StatelessWidget {
   final bool enable;
   final String label;
   final EwaButtonSize size;
+  final double? borderRadius;
   final EwaButtonVariant variant;
   final Future<void> Function()? onPressed;
   final EwaButtonType type;
@@ -236,7 +251,9 @@ class _ButtonWidget extends StatelessWidget {
         focusColor: Colors.transparent,
         textColor: _textColor(context),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(size.data.borderRadius),
+          borderRadius: BorderRadius.circular(
+            borderRadius ?? size.data.borderRadius,
+          ),
           side: BorderSide(
             color: _borderColor(context),
             width: EwaButtonConstants.borderWidth.sp,
