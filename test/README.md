@@ -40,5 +40,6 @@ Each test file focuses on a specific component or utility:
 5. **DateTime Converter Tests** - `utils/datetime_converter_test.dart`
 6. **Logger Tests** - `utils/logger_test.dart`
 7. **HTTP Client Tests** - `network/http_client_test.dart`
+8. **Response Exception Tests** - `network/response_exception_test.dart`
 
 The main test file `ewa_kit_test.dart` aggregates all tests for convenient execution.

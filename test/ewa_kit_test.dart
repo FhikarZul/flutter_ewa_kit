@@ -8,6 +8,7 @@ import 'ui/textfield_test.dart' as textfield_test;
 import 'utils/datetime_converter_test.dart' as datetime_converter_test;
 import 'utils/logger_test.dart' as logger_test;
 import 'network/http_client_test.dart' as http_client_test;
+import 'network/response_exception_test.dart' as response_exception_test;
 
 void main() {
   group('EWA Kit Tests', () {
@@ -32,6 +33,7 @@ void main() {
     // Run all network tests
     group('Network', () {
       http_client_test.main();
+      response_exception_test.main();
     });
   });
 }

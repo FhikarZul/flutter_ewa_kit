@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:ewa_kit/utils/ewa_logger.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 /// EWA Kit initialization wrapper
@@ -9,7 +13,7 @@ import 'package:intl/date_symbol_data_local.dart';
 /// Usage:
 /// ```dart
 /// void main() {
-///   EwaKit.initialize().then((_) {
+///   EwaKit.initialize(() {
 ///     runApp(const MyApp());
 ///   });
 /// }
@@ -18,16 +22,29 @@ class EwaKit {
   EwaKit._();
 
   /// Initializes all required dependencies for EWA Kit
-  ///
-  /// This should be called before runApp() to ensure all dependencies are properly
-  /// initialized.
-  static Future<void> initialize() async {
-    // Initialize screenutil
-    // Note: ScreenUtilInit widget is still required in the widget tree
+  static void initialize(void Function() startApp) {
+    runZonedGuarded(
+      () async {
+        // Ensure the Flutter binding is initialized
+        WidgetsFlutterBinding.ensureInitialized();
 
-    // Initialize intl locale data for Indonesian
-    initializeDateFormatting('id_ID', null);
+        // Initialize intl locale data for Indonesian
+        initializeDateFormatting('id_ID', null);
 
-    // Add any other initializations here as needed
+        FlutterError.onError = (details) {
+          FlutterError.presentError(details);
+          EwaLogger.error(
+            "Flutter Error: ",
+            error: details.exception,
+            stackTrace: details.stack,
+          );
+        };
+
+        startApp();
+      },
+      (error, stack) {
+        EwaLogger.error("Unhandled Error: ", error: error, stackTrace: stack);
+      },
+    );
   }
 }

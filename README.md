@@ -30,7 +30,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
 - 📝 **Toast Notifications** - Success, error, info, and warning notifications
 - ⏳ **Loading Indicators** - Multiple animated loading components
 - 📊 **Lazy Load** - Infinite scroll pagination component with pull-to-refresh
-- 📤 **HTTP Client** - Advanced networking with Dio, token management, infinite retry logic, file download with resume capability, and optional caching
+- 📤 **HTTP Client** - Advanced networking with Dio, token management, infinite retry logic, file download with resume capability, structured error handling, and optional caching
 - 📱 **Bottom Sheets** - Modal bottom sheets with customizable content
 - 📚 **Typography System** - Consistent text styles and hierarchy
 - 🎨 **Color Foundation** - Light and dark theme color palette with automatic adaptation
@@ -101,13 +101,11 @@ Note: EWA Kit internally handles all third-party dependencies like `flutter_scre
 Some components in EWA Kit require additional initialization for optimal performance. Call `EwaKit.initialize()` before running your app:
 
 ```dart
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
+void main() {
   // Initialize EWA Kit
-  await EwaKit.initialize();
-
-  runApp(const MyApp());
+  EwaKit.initialize(() {
+    runApp(const MyApp());
+  });
 }
 ```
 
@@ -988,6 +986,45 @@ The HTTP client implements infinite retry logic for transient failures with expo
 - Implements exponential backoff to avoid overwhelming servers
 - Maximum retry duration of 5 minutes to prevent indefinite hanging
 - Visible retry counters for debugging (e.g., 1/10, 2/10)
+
+#### Error Handling
+
+EWA Kit provides structured error handling for API responses through `EwaResponseException`. This allows you to map HTTP status codes to user-friendly error messages and categorize errors for appropriate handling.
+
+```dart
+try {
+  final response = await httpClient.get('/users/1');
+  // Handle success
+} on DioException catch (e) {
+  // Convert DioException to structured error
+  final ewaException = e.toEwaResponseException();
+  ewaException.logError(); // Log for debugging
+
+  // Show user-friendly error message
+  showErrorDialog(ewaException.message);
+
+  // Handle specific error types
+  switch (ewaException.errorType) {
+    case EwaErrorType.unauthorized:
+      // Redirect to login
+      break;
+    case EwaErrorType.network:
+      // Show offline message
+      break;
+    default:
+      // Handle other errors
+      break;
+  }
+}
+```
+
+The error handling system provides:
+
+- Structured error types for different categories of errors
+- User-friendly error messages in Indonesian
+- Automatic parsing of API error responses
+- Easy logging of detailed error information
+- Extension on DioException for seamless integration
 
 ### Logging
 
