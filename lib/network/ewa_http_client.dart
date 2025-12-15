@@ -1,34 +1,49 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:ewa_kit/network/ewa_cache_manager.dart';
 import 'package:ewa_kit/utils/ewa_logger.dart';
 import 'package:flutter/foundation.dart';
 
-/// Custom HTTP client using Dio with advanced features
+import 'interceptor/logging_interceptor.dart';
+import 'interceptor/retry_interceptor.dart';
+import 'interceptor/token_interceptor.dart';
+
 class EwaHttpClient {
   static final EwaHttpClient _instance = EwaHttpClient._internal();
   factory EwaHttpClient() => _instance;
   EwaHttpClient._internal();
 
   late Dio _dio;
-  String? _accessToken;
-  String? _refreshToken;
-  final int _maxRetries = 3;
+  bool _initialized = false;
+
+  final int _maxRetries = 10; // Increased for "infinite" retry requirement
   final Duration _retryDelay = const Duration(seconds: 1);
+  final Duration _maxRetryDuration = const Duration(
+    minutes: 5,
+  ); // Extended for "infinite" retry
 
-  /// Callback for handling token refresh
+  bool _isCacheEnabled = false;
+  final Map<String, CancelToken> _cancelTokens = {};
+
   Future<bool> Function()? refreshTokenCallback;
-
-  /// Callback for handling logout
   VoidCallback? onLogout;
 
-  /// Initialize the HTTP client
+  // Getter methods to expose private fields to interceptors
+  int get maxRetries => _maxRetries;
+  Duration get retryDelay => _retryDelay;
+  Duration get maxRetryDuration => _maxRetryDuration;
+
   void init({
     String baseUrl = '',
     Map<String, dynamic>? defaultHeaders,
     Duration connectTimeout = const Duration(seconds: 30),
     Duration receiveTimeout = const Duration(seconds: 30),
-  }) {
+    bool enableCaching = false,
+  }) async {
+    _isCacheEnabled = enableCaching;
+
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
@@ -38,114 +53,137 @@ class EwaHttpClient {
       ),
     );
 
-    // Add interceptors
-    _dio.interceptors.add(LoggingInterceptor());
-    _dio.interceptors.add(TokenInterceptor(this));
-    _dio.interceptors.add(RetryInterceptor(this));
-  }
+    _dio.interceptors.addAll([
+      LoggingInterceptor(),
+      TokenInterceptor(this),
+      RetryInterceptor(this),
+    ]);
 
-  /// Set authentication tokens
-  void setTokens(String accessToken, String refreshToken) {
-    _accessToken = accessToken;
-    _refreshToken = refreshToken;
-    _updateAuthHeader();
-  }
-
-  /// Clear authentication tokens
-  void clearTokens() {
-    _accessToken = null;
-    _refreshToken = null;
-    _updateAuthHeader();
-  }
-
-  /// Update authorization header
-  void _updateAuthHeader() {
-    if (_accessToken != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $_accessToken';
-    } else {
-      _dio.options.headers.remove('Authorization');
+    if (_isCacheEnabled) {
+      await EwaCacheManager().init();
+      _dio.interceptors.add(
+        DioCacheInterceptor(options: EwaCacheManager().cacheOptions),
+      );
     }
+
+    _initialized = true;
   }
 
-  /// GET request
-  Future<Response<T>> get<T>(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-    Options? options,
-  }) async {
-    return _dio.get<T>(
-      path,
-      queryParameters: queryParameters,
-      options: _mergeOptions(options, headers),
+  Dio get dio {
+    assert(_initialized, 'EwaHttpClient.init() belum dipanggil');
+    return _dio;
+  }
+
+  void setTokens(String accessToken, String refreshToken) {
+    dio.options.headers['Authorization'] = 'Bearer $accessToken';
+  }
+
+  void clearTokens() {
+    dio.options.headers.remove('Authorization');
+  }
+
+  String _generateRequestId() =>
+      DateTime.now().millisecondsSinceEpoch.toString();
+
+  void cancelRequest(String requestId) {
+    _cancelTokens.remove(requestId)?.cancel();
+  }
+
+  void cancelAllRequests() {
+    for (final token in _cancelTokens.values) {
+      token.cancel();
+    }
+    _cancelTokens.clear();
+  }
+
+  Options _mergeOptions(Options? options, Map<String, dynamic>? headers) {
+    if (headers == null) return options ?? Options();
+    return (options ?? Options()).copyWith(
+      headers: {...?options?.headers, ...headers},
     );
   }
 
-  /// POST request
+  /// Make a GET request
+  Future<Response<T>> get<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    assert(_initialized, 'HTTP client must be initialized before use');
+
+    Options? finalOptions = options;
+    if (_isCacheEnabled) {
+      finalOptions = EwaCacheManager().buildCacheOptions();
+    }
+
+    return await _dio.get<T>(
+      path,
+      queryParameters: queryParameters,
+      options: finalOptions,
+      cancelToken: cancelToken,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
+
   Future<Response<T>> post<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
     Options? options,
+    String? requestId,
   }) async {
-    return _dio.post<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: _mergeOptions(options, headers),
-    );
-  }
+    final token = CancelToken();
+    final id = requestId ?? _generateRequestId();
+    _cancelTokens[id] = token;
 
-  /// PUT request
-  Future<Response<T>> put<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-    Options? options,
-  }) async {
-    return _dio.put<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: _mergeOptions(options, headers),
-    );
-  }
-
-  /// DELETE request
-  Future<Response<T>> delete<T>(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-    Options? options,
-  }) async {
-    return _dio.delete<T>(
-      path,
-      queryParameters: queryParameters,
-      options: _mergeOptions(options, headers),
-    );
-  }
-
-  /// Merge custom headers with options
-  Options _mergeOptions(Options? options, Map<String, dynamic>? headers) {
-    if (headers == null) return options ?? Options();
-
-    final mergedHeaders = <String, dynamic>{};
-    if (options?.headers != null) {
-      mergedHeaders.addAll(options!.headers!);
+    try {
+      return await dio.post<T>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: _mergeOptions(options, headers),
+        cancelToken: token,
+      );
+    } finally {
+      _cancelTokens.remove(id);
     }
-    mergedHeaders.addAll(headers);
-
-    return (options ?? Options()).copyWith(headers: mergedHeaders);
   }
 
-  /// Refresh tokens
   Future<bool> refreshTokens() async {
-    if (refreshTokenCallback != null) {
-      return refreshTokenCallback!();
+    return refreshTokenCallback?.call() ?? false;
+  }
+
+  bool get isCachingEnabled => _isCacheEnabled;
+
+  /// Enable caching for this HTTP client
+  void enableCaching() {
+    if (!_isCacheEnabled) {
+      _isCacheEnabled = true;
+      EwaCacheManager().init();
+      _dio.interceptors.add(
+        DioCacheInterceptor(options: EwaCacheManager().cacheOptions),
+      );
     }
-    return false;
+  }
+
+  /// Disable caching for this HTTP client
+  void disableCaching() {
+    if (_isCacheEnabled) {
+      _isCacheEnabled = false;
+      _dio.interceptors.removeWhere(
+        (interceptor) => interceptor is DioCacheInterceptor,
+      );
+    }
+  }
+
+  /// Clear all cached data
+  Future<void> clearCache() async {
+    if (_isCacheEnabled) {
+      await EwaCacheManager().clearCache();
+    }
   }
 
   /// Download a file from the given URL
@@ -163,9 +201,14 @@ class EwaHttpClient {
     ProgressCallback? onProgress,
     Map<String, dynamic>? headers,
     Options? options,
+    String? requestId,
   }) async {
     EwaLogger.info('Starting file download from: $url');
     EwaLogger.debug('Saving to: $savePath');
+
+    final token = CancelToken();
+    final id = requestId ?? _generateRequestId();
+    _cancelTokens[id] = token;
 
     try {
       // Merge headers with options if provided
@@ -185,6 +228,7 @@ class EwaHttpClient {
         savePath,
         onReceiveProgress: onProgress,
         options: mergedOptions,
+        cancelToken: token,
         deleteOnError: true,
       );
 
@@ -201,6 +245,8 @@ class EwaHttpClient {
     } catch (e) {
       EwaLogger.error('File download failed: $e');
       rethrow;
+    } finally {
+      _cancelTokens.remove(id);
     }
   }
 
@@ -219,9 +265,14 @@ class EwaHttpClient {
     ProgressCallback? onProgress,
     Map<String, dynamic>? headers,
     Options? options,
+    String? requestId,
   }) async {
     EwaLogger.info('Starting resumable file download from: $url');
     EwaLogger.debug('Saving to: $savePath');
+
+    final token = CancelToken();
+    final id = requestId ?? _generateRequestId();
+    _cancelTokens[id] = token;
 
     try {
       // Check if partial file exists
@@ -282,6 +333,7 @@ class EwaHttpClient {
           }
         },
         options: mergedOptions,
+        cancelToken: token,
         deleteOnError: false, // Don't delete on error for resume capability
       );
 
@@ -296,192 +348,51 @@ class EwaHttpClient {
         );
       }
     } on DioException catch (e) {
-      // Handle 416 Range Not Satisfiable - file might be already downloaded
+      // Handle 416 Range Not Satisfiable - restart download from beginning
       if (e.response?.statusCode == 416) {
         EwaLogger.warn(
-          'Range not satisfiable (416), file may be already downloaded',
+          'Range not satisfiable (416). Restarting download from beginning.',
         );
+
+        // Delete the incomplete file
         final file = File(savePath);
         if (await file.exists()) {
-          EwaLogger.info(
-            'File already exists and is likely complete: $savePath',
-          );
-          return savePath;
+          await file.delete();
+          EwaLogger.debug('Deleted incomplete file: $savePath');
         }
+
+        // Restart download from beginning (without range header)
+        EwaLogger.info('Restarting download from beginning: $url');
+        return await _dio
+            .download(
+              url,
+              savePath,
+              onReceiveProgress: onProgress,
+              options: options,
+              cancelToken: token,
+              deleteOnError: true,
+            )
+            .then((response) {
+              if (response.statusCode == 200) {
+                EwaLogger.info('File downloaded successfully to: $savePath');
+                return savePath;
+              } else {
+                throw DioException(
+                  error: 'Download failed with status: ${response.statusCode}',
+                  requestOptions: response.requestOptions,
+                  response: response,
+                );
+              }
+            });
       }
+
       EwaLogger.error('Resumable file download failed: $e');
       rethrow;
     } catch (e) {
       EwaLogger.error('Resumable file download failed: $e');
       rethrow;
+    } finally {
+      _cancelTokens.remove(id);
     }
-  }
-
-  /// Getters
-  Dio get dio => _dio;
-  String? get accessToken => _accessToken;
-  String? get refreshToken => _refreshToken;
-}
-
-/// Interceptor for logging requests and responses
-class LoggingInterceptor extends Interceptor {
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    EwaLogger.info('=== HTTP REQUEST ===');
-    EwaLogger.info('${options.method} ${options.uri}');
-
-    if (options.headers.isNotEmpty) {
-      EwaLogger.debug('Headers: ${options.headers}');
-    }
-
-    if (options.data != null) {
-      EwaLogger.debug('Payload: ${options.data}');
-    }
-
-    if (options.queryParameters.isNotEmpty) {
-      EwaLogger.debug('Query Params: ${options.queryParameters}');
-    }
-
-    super.onRequest(options, handler);
-  }
-
-  @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) {
-    EwaLogger.info('=== HTTP RESPONSE ===');
-    EwaLogger.info('${response.statusCode} ${response.statusMessage}');
-    EwaLogger.debug('Response: ${response.data}');
-
-    super.onResponse(response, handler);
-  }
-
-  @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
-    EwaLogger.error('=== HTTP ERROR ===');
-    EwaLogger.error('Error: ${err.message}');
-    EwaLogger.error('Status: ${err.response?.statusCode}');
-    EwaLogger.error('Data: ${err.response?.data}');
-
-    super.onError(err, handler);
-  }
-}
-
-/// Interceptor for handling authentication tokens
-class TokenInterceptor extends Interceptor {
-  final EwaHttpClient _client;
-
-  TokenInterceptor(this._client);
-
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // Add timestamp to request for cache busting
-    options.queryParameters['_t'] = DateTime.now().millisecondsSinceEpoch;
-    super.onRequest(options, handler);
-  }
-
-  @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
-    // Handle 401 Unauthorized errors
-    if (err.response?.statusCode == 401) {
-      EwaLogger.warn('Token expired, attempting to refresh...');
-
-      final refreshed = await _client.refreshTokens();
-      if (refreshed) {
-        // Retry the original request with new token
-        try {
-          final opts = err.requestOptions;
-          final response = await _client.dio.request(
-            opts.path,
-            data: opts.data,
-            queryParameters: opts.queryParameters,
-            options: Options(method: opts.method, headers: opts.headers),
-          );
-          return handler.resolve(response);
-        } catch (e) {
-          EwaLogger.error('Failed to retry request after token refresh: $e');
-        }
-      } else {
-        EwaLogger.error('Token refresh failed, logging out...');
-        _client.onLogout?.call();
-      }
-    }
-
-    super.onError(err, handler);
-  }
-}
-
-/// Interceptor for handling retry logic
-class RetryInterceptor extends Interceptor {
-  final EwaHttpClient _client;
-
-  RetryInterceptor(this._client);
-
-  @override
-  Future<void> onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) async {
-    // Check if we should retry the request
-    if (_shouldRetry(err)) {
-      final requestOptions = err.requestOptions;
-
-      // Get retry count from extra data
-      final retryCount = requestOptions.extra['_retry_count'] as int? ?? 0;
-
-      if (retryCount < _client._maxRetries) {
-        EwaLogger.warn(
-          'Retrying request (${retryCount + 1}/${_client._maxRetries})...',
-        );
-
-        // Wait before retrying
-        await Future.delayed(_client._retryDelay * (retryCount + 1));
-
-        // Update retry count and retry the request
-        requestOptions.extra['_retry_count'] = retryCount + 1;
-        try {
-          final response = await _client.dio.request(
-            requestOptions.path,
-            data: requestOptions.data,
-            queryParameters: requestOptions.queryParameters,
-            options: Options(
-              method: requestOptions.method,
-              headers: requestOptions.headers,
-              responseType: requestOptions.responseType,
-              contentType: requestOptions.contentType,
-              validateStatus: requestOptions.validateStatus,
-              receiveTimeout: requestOptions.receiveTimeout,
-              sendTimeout: requestOptions.sendTimeout,
-            ),
-          );
-          return handler.resolve(response);
-        } catch (e) {
-          // Continue with error handling
-        }
-      } else {
-        EwaLogger.error('Max retries exceeded for request');
-      }
-    }
-
-    super.onError(err, handler);
-  }
-
-  /// Determine if a request should be retried
-  bool _shouldRetry(DioException err) {
-    // Retry on network errors
-    if (err.type == DioExceptionType.connectionTimeout ||
-        err.type == DioExceptionType.sendTimeout ||
-        err.type == DioExceptionType.receiveTimeout ||
-        err.type == DioExceptionType.badCertificate ||
-        err.type == DioExceptionType.connectionError) {
-      return true;
-    }
-
-    // Retry on server errors (5xx)
-    if (err.response?.statusCode != null &&
-        err.response!.statusCode! >= 500 &&
-        err.response!.statusCode! < 600) {
-      return true;
-    }
-
-    return false;
   }
 }

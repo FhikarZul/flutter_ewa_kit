@@ -18,10 +18,16 @@ class _HttpExampleScreenState extends State<HttpExampleScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize the HTTP client
+    // Initialize the HTTP client with caching enabled
+    _initHttpClient();
+  }
+
+  /// Initialize the HTTP client asynchronously
+  Future<void> _initHttpClient() async {
     _httpClient.init(
       baseUrl: 'https://jsonplaceholder.typicode.com',
       defaultHeaders: {'Content-Type': 'application/json'},
+      enableCaching: true, // Enable caching for offline support
     );
 
     // Set up token refresh callback
@@ -44,6 +50,29 @@ class _HttpExampleScreenState extends State<HttpExampleScreen> {
     _httpClient.clearTokens();
     setState(() {
       _response = 'Logged out due to token refresh failure';
+    });
+  }
+
+  /// Toggle caching
+  void _toggleCaching() {
+    if (_httpClient.isCachingEnabled) {
+      _httpClient.disableCaching();
+      setState(() {
+        _response = 'Caching disabled';
+      });
+    } else {
+      _httpClient.enableCaching();
+      setState(() {
+        _response = 'Caching enabled';
+      });
+    }
+  }
+
+  /// Clear cache
+  Future<void> _clearCache() async {
+    await _httpClient.clearCache();
+    setState(() {
+      _response = 'Cache cleared';
     });
   }
 
@@ -200,29 +229,6 @@ class _HttpExampleScreenState extends State<HttpExampleScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                _httpClient.setTokens(
-                  'test_access_token',
-                  'test_refresh_token',
-                );
-                setState(() {
-                  _response = 'Tokens set';
-                });
-              },
-              child: const Text('Set Tokens'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                _httpClient.clearTokens();
-                setState(() {
-                  _response = 'Tokens cleared';
-                });
-              },
-              child: const Text('Clear Tokens'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
               onPressed: _isLoading ? null : _downloadFile,
               child: const Text('Download File'),
             ),
@@ -230,6 +236,44 @@ class _HttpExampleScreenState extends State<HttpExampleScreen> {
             ElevatedButton(
               onPressed: _isLoading ? null : _downloadFileWithResume,
               child: const Text('Download File with Resume'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _toggleCaching,
+              child: Text(
+                _httpClient.isCachingEnabled
+                    ? 'Disable Caching'
+                    : 'Enable Caching',
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _clearCache,
+              child: const Text('Clear Cache'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      _httpClient.setTokens('test_token', 'test_refresh_token');
+                      setState(() {
+                        _response = 'Tokens set';
+                      });
+                    },
+              child: const Text('Set Tokens'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      _httpClient.clearTokens();
+                      setState(() {
+                        _response = 'Tokens cleared';
+                      });
+                    },
+              child: const Text('Clear Tokens'),
             ),
             const SizedBox(height: 16),
             if (_isLoading && _downloadProgress > 0)

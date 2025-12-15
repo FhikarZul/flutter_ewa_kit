@@ -36,6 +36,9 @@ dependencies:
   # HTTP client for making REST API requests
   dio: ^5.7.0
 
+  # HTTP caching interceptor for offline support
+  dio_cache_interceptor: ^4.0.5
+
   # Path provider for accessing device directories
   path_provider: ^2.1.5
 

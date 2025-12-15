@@ -2,27 +2,41 @@
 
 A comprehensive Flutter UI component library with a robust design system that supports dark mode, responsive sizing, and customizable components.
 
+EWA Kit provides a complete set of pre-built, customizable UI components and utilities that follow consistent design principles. It simplifies Flutter development by offering ready-to-use components with built-in functionality, reducing boilerplate code and ensuring design consistency across your application.
+
+## Key Benefits
+
+- **Rapid Development**: Pre-built components reduce development time
+- **Consistent Design**: Unified design system across all components
+- **Easy Customization**: Highly configurable components to match your brand
+- **Responsive Ready**: Built-in support for different screen sizes
+- **Dark Mode Support**: Automatic theme adaptation
+- **Well Tested**: Comprehensive test coverage for reliability
+
 ## Features
 
-- 🎨 **Customizable Buttons** - Multiple variants (primary, secondary, tertiary, danger)
+- 🎨 **Customizable Buttons** - Multiple variants (primary, secondary, tertiary, danger) with configurable border radius
 - 🌓 **Dark Mode Support** - Automatic color adaptation based on app theme
-- 📐 **Responsive Design** - Built-in support for different screen sizes
+- 📐 **Responsive Design** - Built-in support for different screen sizes using flutter_screenutil
 - 🎯 **Multiple Button Types** - Filled, outline, and ghost styles
 - 📏 **Flexible Sizing** - Five size options (xs, sm, md, lg, xl)
-- ⚡ **Debounce Support** - Prevent multiple rapid clicks
-- 🔧 **Highly Configurable** - Extensive customization options
+- ⚡ **Debounce Support** - Prevent multiple rapid clicks with visual feedback
+- 🔧 **Highly Configurable** - Extensive customization options for all components
 - 🔄 **Custom Border Radius** - Configure corner rounding for buttons and text fields
-- ✅ **Built-in Validators** - Reusable validation functions for form fields
-- 💰 **Currency Formatter** - Indonesian currency formatting for text fields
-- 🗓️ **DateTime Converter** - Date/time parsing and formatting with Indonesian localization
+- ✅ **Built-in Validators** - Reusable validation functions for form fields with customizable error messages
+- 💰 **Currency Formatter** - Robust Indonesian currency formatting for financial applications
+- 🗓️ **DateTime Converter** - Comprehensive date/time parsing and formatting with Indonesian localization
 - 📋 **Dialog Components** - Alert, confirmation, and custom dialogs
 - 📝 **Toast Notifications** - Success, error, info, and warning notifications
 - ⏳ **Loading Indicators** - Multiple animated loading components
-- 📊 **Lazy Load** - Infinite scroll pagination component
-- 📤 **HTTP Client** - Advanced networking with Dio, token management, and file download
+- 📊 **Lazy Load** - Infinite scroll pagination component with pull-to-refresh
+- 📤 **HTTP Client** - Advanced networking with Dio, token management, infinite retry logic, file download with resume capability, and optional caching
 - 📱 **Bottom Sheets** - Modal bottom sheets with customizable content
 - 📚 **Typography System** - Consistent text styles and hierarchy
-- 🎨 **Color Foundation** - Light and dark theme color palette
+- 🎨 **Color Foundation** - Light and dark theme color palette with automatic adaptation
+- 📦 **Design System Foundations** - Complete design system with spacing, colors, and typography
+- 🇮🇩 **Indonesian Market Focus** - Specialized features for Indonesian financial applications and localization
+- 🛠️ **Utility Functions** - Comprehensive utilities for logging, date handling, and more
 
 ## Table of Contents
 
@@ -36,12 +50,20 @@ A comprehensive Flutter UI component library with a robust design system that su
   - [Loading Indicators](#loading-indicators)
   - [Bottom Sheets](#bottom-sheets)
   - [Lazy Load](#lazy-load)
+- [Foundations](#foundations)
+  - [Color System](#color-system)
+  - [Typography](#typography)
+  - [Spacing System](#spacing-system)
+- [Responsive Design](#responsive-design)
+- [EwaApp Component](#ewaapp-component)
 - [Utilities](#utilities)
   - [DateTime Converter](#datetime-converter)
   - [HTTP Client](#http-client)
   - [Logging](#logging)
 - [Customization](#customization)
+  - [Color Foundation](#color-foundation)
 - [Dark Mode](#dark-mode)
+- [Best Practices](#best-practices)
 - [Examples](#examples)
 
 ## Installation
@@ -62,58 +84,21 @@ flutter pub get
 
 ## Setup
 
-### 1. Import the package
+Setting up EWA Kit in your Flutter application is straightforward. Follow these steps to integrate EWA Kit components and utilities into your project.
+
+### 1. Import the Package
+
+Import the main EWA Kit package in your Dart files where you want to use the components:
 
 ```dart
 import 'package:ewa_kit/ewa_kit.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 ```
 
-### 2. Initialize ScreenUtil (Required)
+Note: EWA Kit internally handles all third-party dependencies like `flutter_screenutil`, so you don't need to import them separately.
 
-Wrap your MaterialApp with `ScreenUtilInit` in your `main.dart`:
+### 2. Initialize All EWA Kit Dependencies
 
-```dart
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(375, 812), // iPhone X size (recommended)
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return MaterialApp(
-          title: 'Your App',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
-          ),
-          darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
-              brightness: Brightness.dark,
-            ),
-            useMaterial3: true,
-          ),
-          themeMode: ThemeMode.system,
-          home: const HomePage(),
-        );
-      },
-    );
-  }
-}
-```
-
-### 3. Initialize All EWA Kit Dependencies
-
-Some components in EWA Kit require additional initialization for optimal performance:
+Some components in EWA Kit require additional initialization for optimal performance. Call `EwaKit.initialize()` before running your app:
 
 ```dart
 void main() async {
@@ -133,8 +118,81 @@ The `EwaKit.initialize()` method handles the initialization of all required depe
 - Default theme settings
 - Network client setup
 - Logger configuration
+- Internationalization settings (for Indonesian localization)
 
 This ensures all components work correctly and have access to the required resources.
+
+### 3. Initialize Ewa App (Required)
+
+EWA Kit uses `flutter_screenutil` for responsive design. Wrap your MaterialApp with `EwaApp` (provided by EWA Kit) in your `main.dart`:
+
+```dart
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return EwaApp(
+      designSize: const Size(375, 812), // iPhone X size (recommended)
+      minTextAdapt: true,
+      splitScreenMode: true,
+      child: MaterialApp(
+        title: 'Your App',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepPurple,
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        themeMode: ThemeMode.system,
+        home: const HomePage(),
+      ),
+    );
+  }
+}
+```
+
+### 4. Theme Integration
+
+EWA Kit components automatically adapt to your app's theme. Ensure your MaterialApp has proper theme definitions:
+
+```dart
+MaterialApp(
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: EwaColorFoundation.primaryLight,
+      primary: EwaColorFoundation.primaryLight,
+      secondary: EwaColorFoundation.secondaryLight,
+      error: EwaColorFoundation.errorLight,
+    ),
+    useMaterial3: true,
+  ),
+  darkTheme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: EwaColorFoundation.primaryDark,
+      primary: EwaColorFoundation.primaryDark,
+      secondary: EwaColorFoundation.secondaryDark,
+      error: EwaColorFoundation.errorDark,
+      brightness: Brightness.dark,
+    ),
+    useMaterial3: true,
+  ),
+  themeMode: ThemeMode.system, // or ThemeMode.light, ThemeMode.dark
+  home: const HomePage(),
+);
+```
+
+Using EWA Kit's color foundation ensures consistent coloring across all components.
 
 ## Components
 
@@ -316,6 +374,8 @@ EwaButton.primary(
 
 #### Custom Border Radius
 
+All EWA Kit buttons support customizable border radius, allowing you to create buttons with rounded corners, pill shapes, or sharp square corners. This feature provides flexibility in matching your application's design language:
+
 ```dart
 // Rounded corners (20.0 radius)
 EwaButton.primary(
@@ -337,11 +397,27 @@ EwaButton.danger(
   borderRadius: 0.0,
   onPressed: () async {},
 );
+
+// Subtle rounding (8.0 radius) - default for most buttons
+EwaButton.primary(
+  label: 'Subtly Rounded',
+  borderRadius: 8.0,
+  onPressed: () async {},
+);
+
+// Fully circular button (height/2 radius)
+EwaButton.primary(
+  label: 'Circular',
+  borderRadius: 24.0, // Half of button height for circular shape
+  onPressed: () async {},
+);
 ```
+
+The border radius parameter accepts any double value, giving you complete control over the button's corner appearance. When no border radius is specified, buttons use the default radius defined in their size configuration.
 
 ### TextFields
 
-EWA Kit provides customizable TextField components with multiple variants and built-in validation.
+EWA Kit provides customizable TextField components with multiple variants, built-in validation, and specialized formatters for financial applications.
 
 #### TextField Variants
 
@@ -426,7 +502,7 @@ EwaTextField.tertiary(
 
 #### TextField Validation
 
-EWA Kit includes a comprehensive set of reusable validators:
+EWA Kit includes a comprehensive set of reusable validators with customizable error messages:
 
 ```dart
 // Required field validation
@@ -448,6 +524,7 @@ EwaTextField.primary(
 EwaTextField.primary(
   hintText: 'Password',
   obscureText: true,
+  prefixIcon: const Icon(Icons.lock),
   validator: EwaValidators.password,
 );
 
@@ -477,6 +554,18 @@ EwaTextField.primary(
     (val) => EwaValidators.maxLength(20, val),
   ], value),
 );
+
+// Credit card validation
+EwaTextField.primary(
+  hintText: 'Credit Card Number',
+  validator: EwaValidators.creditCard,
+);
+
+// URL validation
+EwaTextField.primary(
+  hintText: 'Website URL',
+  validator: EwaValidators.url,
+);
 ```
 
 Available validators include:
@@ -492,12 +581,12 @@ Available validators include:
 - `min` - Validates minimum numeric value
 - `max` - Validates maximum numeric value
 - `url` - Validates URL format
-- `creditCard` - Validates credit card number
+- `creditCard` - Validates credit card number using Luhn algorithm
 - `combine` - Allows combining multiple validators
 
 #### Currency Formatter
 
-EWA Kit includes a currency formatter for Indonesian financial applications:
+EWA Kit includes a robust currency formatter specifically designed for Indonesian financial applications:
 
 ```dart
 // Currency formatted TextField
@@ -506,7 +595,22 @@ EwaTextField.primary(
   formatter: (value) => EwaFormatters.currencyFormatter(value),
   keyboardType: TextInputType.number,
 );
+
+// Custom currency formatter with parameters
+EwaTextField.primary(
+  hintText: 'USD Amount',
+  formatter: (value) => EwaFormatters.currencyFormatter(
+    value,
+    currencySymbol: '$',
+    thousandSeparator: ',',
+    decimalSeparator: '.',
+    decimalDigits: 2,
+  ),
+  keyboardType: TextInputType.number,
+);
 ```
+
+The currency formatter is designed to be crash-safe and handles various edge cases in numeric input formatting. It automatically extracts digits from input and formats them according to the specified currency standards.
 
 ### Dialogs
 
@@ -654,13 +758,13 @@ await EwaBottomSheet.show(
 
 ### Lazy Load
 
-Infinite scroll pagination component for loading data progressively:
+Infinite scroll pagination component for loading data progressively. Perfect for implementing paginated lists that load more data as the user scrolls:
 
 ```dart
 EwaLazyLoad(
-  page: 1,
-  totalPage: 3,
-  itemCount: 5,
+  page: 1,           // Current page number
+  totalPage: 3,      // Total number of pages
+  itemCount: 5,      // Number of items on current page
   itemBuilder: (context, index) {
     return ListTile(
       title: Text('Item ${index + 1}'),
@@ -669,20 +773,43 @@ EwaLazyLoad(
   },
   onChanged: (page) {
     // Handle page change
+    // This callback is triggered when user reaches the end of the list
+    // and more data needs to be loaded
+    loadData(page);
   },
-  isLoading: false,
+  isLoading: false,  // Set to true when loading data
   onRefresh: () async {
-    // Handle refresh
+    // Handle pull-to-refresh
+    // Typically used to reload the first page of data
+    await refreshData();
   },
-  emptyMessage: 'Tidak ada data tersedia',
+  emptyMessage: 'Tidak ada data tersedia', // Message to show when no data is available
 );
 ```
+
+#### Key Features
+
+- **Automatic Pagination**: Automatically detects when user has scrolled to the end and triggers the `onChanged` callback
+- **Loading States**: Visual indicators for loading states with customizable loading widgets
+- **Pull-to-Refresh**: Built-in support for refreshing the entire list
+- **Empty States**: Customizable message for when no data is available
+- **Error Handling**: Graceful handling of network errors and data loading failures
+
+#### Usage Tips
+
+1. Set `isLoading` to `true` when fetching data and `false` when complete
+2. Update `page`, `totalPage`, and `itemCount` based on API response
+3. Use `onRefresh` to implement pull-to-refresh functionality
+4. Customize the `emptyMessage` to match your application's language and design
+5. Handle errors in your `onChanged` callback and display appropriate UI feedback
+
+````
 
 ## Utilities
 
 ### DateTime Converter
 
-Comprehensive date/time parsing and formatting utilities with Indonesian localization:
+Comprehensive date/time parsing and formatting utilities with Indonesian localization. Supports both international and Indonesian formatting standards with fallback mechanisms:
 
 ```dart
 // Format to full date and time
@@ -704,11 +831,36 @@ final age = EwaDateTimeConverter.calculateAge(DateTime(1990, 1, 1));
 // Get Indonesian day/month names
 final dayName = EwaDateTimeConverter.getIndonesianDayName(DateTime.now());
 final monthName = EwaDateTimeConverter.getIndonesianMonthName(DateTime.now());
-```
+
+// Format with various options
+final humanReadable = EwaDateTimeConverter.formatToHumanReadable(DateTime.now());
+final shortDate = EwaDateTimeConverter.formatToShortDate(DateTime.now());
+final timeOnly = EwaDateTimeConverter.formatToTime(DateTime.now());
+final iso8601 = EwaDateTimeConverter.formatToIso8601(DateTime.now());
+
+// Indonesian formats
+final indoDate = EwaDateTimeConverter.formatToIndonesian(DateTime.now());
+final shortIndoDate = EwaDateTimeConverter.formatToShortIndonesian(DateTime.now());
+final indoTime = EwaDateTimeConverter.formatToIndonesianTime(DateTime.now());
+
+// Date utilities
+final isToday = EwaDateTimeConverter.isToday(DateTime.now());
+final isYesterday = EwaDateTimeConverter.isYesterday(DateTime.now());
+final startOfDay = EwaDateTimeConverter.startOfDay(DateTime.now());
+final endOfDay = EwaDateTimeConverter.endOfDay(DateTime.now());
+final age = EwaDateTimeConverter.calculateAge(birthDate);
+final durationFormatted = EwaDateTimeConverter.formatDuration(Duration(hours: 2, minutes: 30));
+````
+
+The DateTime converter includes robust error handling with automatic fallback to English formatting if Indonesian locale data is not properly initialized.
 
 ### HTTP Client
 
-Advanced HTTP client with token management, retry logic, and file download capabilities:
+Advanced HTTP client with token management, infinite retry logic for transient failures, file download capabilities, optional caching for offline support, and request cancellation. Built on top of Dio with additional enterprise-grade features.
+
+#### Initialization
+
+Initialize the HTTP client with your API configuration:
 
 ```dart
 final httpClient = EwaHttpClient();
@@ -717,61 +869,151 @@ final httpClient = EwaHttpClient();
 httpClient.init(
   baseUrl: 'https://api.example.com',
   defaultHeaders: {'Content-Type': 'application/json'},
+  // Enable caching for offline support (optional)
+  enableCaching: true,
+  connectTimeout: const Duration(seconds: 30),
+  receiveTimeout: const Duration(seconds: 30),
 );
+```
 
+#### Authentication
+
+Handle token-based authentication with automatic refresh:
+
+```dart
 // Set up token refresh callback
 httpClient.refreshTokenCallback = () async {
   // Refresh tokens and return true if successful
+  // This will be automatically called when a 401 response is received
   return true;
 };
 
 // Set up logout callback
 httpClient.onLogout = () {
   // Handle logout when token refresh fails
+  // This will be called if token refresh also fails
 };
 
-// Make GET request
-final response = await httpClient.get('/users/1');
+// Manually set authentication tokens
+httpClient.setTokens('access_token', 'refresh_token');
+
+// Clear authentication tokens
+httpClient.clearTokens();
+```
+
+#### Making Requests
+
+Perform HTTP requests with cancellation support:
+
+```dart
+// Make GET request with cancellation support
+final requestId = 'unique_request_id';
+final response = await httpClient.get(
+  '/users/1',
+  requestId: requestId, // Optional: for request cancellation
+);
+
+// Cancel a specific request
+httpClient.cancelRequest(requestId);
+
+// Cancel all ongoing requests
+httpClient.cancelAllRequests();
 
 // Make POST request
 final response = await httpClient.post('/users', data: {'name': 'John'});
 
+// Make PUT request
+final response = await httpClient.put('/users/1', data: {'name': 'Jane'});
+
+// Make DELETE request
+final response = await httpClient.delete('/users/1');
+```
+
+#### File Downloads
+
+Download files with progress tracking and resume capability:
+
+```dart
 // Download file
 final filePath = await httpClient.downloadFile(
   'https://example.com/image.jpg',
   '/path/to/save/image.jpg',
   onProgress: (received, total) {
     // Handle progress updates
+    print('Downloaded: ${received}/${total} bytes');
   },
 );
 
 // Download file with resume capability
+// Automatically resumes from where it left off if the download is interrupted
 final filePath = await httpClient.downloadFileWithResume(
   'https://example.com/large-file.zip',
   '/path/to/save/large-file.zip',
   onProgress: (received, total) {
     // Handle progress updates
+    print('Downloaded: ${received}/${total} bytes');
   },
 );
 ```
 
-### Logging
+#### Caching
 
-Colored logging utility for debugging:
+Enable caching for offline support and improved performance:
 
 ```dart
-// Info log
-EwaLogger.info('This is an info message');
+// Enable/disable caching dynamically
+httpClient.enableCaching();   // Enable caching
+httpClient.disableCaching();  // Disable caching
+print(httpClient.isCachingEnabled); // Check if caching is enabled
 
-// Warning log
-EwaLogger.warn('This is a warning message');
+// Clear all cached data
+await httpClient.clearCache();
 
-// Error log
-EwaLogger.error('This is an error message');
-
-// Debug log
-EwaLogger.debug('This is a debug message');
+// Configure cache behavior per request
+final response = await httpClient.get(
+  '/users',
+  options: EwaCacheManager().buildCacheOptions(
+    policy: CachePolicy.forceCache, // Force use of cache
+    maxStale: Duration(days: 1),    // Allow stale data up to 1 day
+  ),
+);
 ```
+
+#### Retry Logic
+
+The HTTP client implements infinite retry logic for transient failures with exponential backoff:
+
+- Automatically retries failed requests due to network issues
+- Respects retry-after headers from servers
+- Implements exponential backoff to avoid overwhelming servers
+- Maximum retry duration of 5 minutes to prevent indefinite hanging
+- Visible retry counters for debugging (e.g., 1/10, 2/10)
+
+### Logging
+
+Colored logging utility for debugging with different log levels and enhanced formatting:
+
+```dart
+// Debug log (white) - Detailed information for diagnosing problems
+EwaLogger.debug('Processing user data: ${userData.toJson()}');
+
+// Info log (blue) - General information about application progress
+EwaLogger.info('User logged in successfully: ${user.id}');
+
+// Warning log (yellow) - Potentially harmful situations
+EwaLogger.warn('Low memory warning: ${memoryUsage}%');
+
+// Error log (red) - Error events that might still allow the application to continue running
+EwaLogger.error('Failed to load user data', error: e, stackTrace: s);
+
+// Fatal log (bright red) - Very severe error events that will presumably lead the application to abort
+EwaLogger.fatal('Critical system failure', error: e, stackTrace: s);
+
+// Trace log (gray) - Fine-grained informational events than the debug level
+EwaLogger.trace('Entering function validateUserData');
+```
+
+The logger provides colored output for better readability in console logs and includes timestamps for easier debugging. All log messages are automatically prefixed with the log level emoji for quick visual identification.
 
 ## Customization
 
@@ -850,6 +1092,207 @@ EwaButton.primary(
     // Handle action
   },
 );
+```
+
+### Color Foundation
+
+EWA Kit provides a comprehensive color foundation that supports both light and dark themes:
+
+```dart
+// Using EWA Kit colors in your theme
+MaterialApp(
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: EwaColorFoundation.primaryLight,
+      primary: EwaColorFoundation.primaryLight,
+      secondary: EwaColorFoundation.secondaryLight,
+      error: EwaColorFoundation.errorLight,
+    ),
+  ),
+  darkTheme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: EwaColorFoundation.primaryDark,
+      primary: EwaColorFoundation.primaryDark,
+      secondary: EwaColorFoundation.secondaryDark,
+      error: EwaColorFoundation.errorDark,
+      brightness: Brightness.dark,
+    ),
+  ),
+);
+
+// Using EWA Kit colors directly in widgets
+Container(
+  color: EwaColorFoundation.resolveColor(
+    context,
+    EwaColorFoundation.primaryLight,  // Light theme color
+    EwaColorFoundation.primaryDark,   // Dark theme color
+  ),
+  child: Text('Themed Text'),
+);
+```
+
+The color foundation includes:
+
+- **Primary Colors**: Main brand colors for primary actions
+- **Secondary Colors**: Supporting colors for secondary actions
+- **Neutral Colors**: Grayscale colors for backgrounds, text, and borders
+- **Error Colors**: Colors for error states and destructive actions
+- **Success Colors**: Colors for success states and positive actions
+- **Warning Colors**: Colors for warning states and cautionary actions
+
+All colors automatically adapt to light and dark themes, ensuring consistent appearance across different theme modes.
+
+## Foundations
+
+EWA Kit is built on a robust design system foundation that ensures consistency across all components. The foundations include:
+
+### Color System
+
+A comprehensive color palette that supports both light and dark themes with automatic adaptation:
+
+```dart
+// Using EWA Kit colors in your theme
+MaterialApp(
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: EwaColorFoundation.primaryLight,
+      primary: EwaColorFoundation.primaryLight,
+      secondary: EwaColorFoundation.secondaryLight,
+      error: EwaColorFoundation.errorLight,
+    ),
+  ),
+  darkTheme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: EwaColorFoundation.primaryDark,
+      primary: EwaColorFoundation.primaryDark,
+      secondary: EwaColorFoundation.secondaryDark,
+      error: EwaColorFoundation.errorDark,
+      brightness: Brightness.dark,
+    ),
+  ),
+);
+```
+
+### Typography
+
+Consistent text styles and hierarchy for readable content:
+
+```dart
+// Using EWA Kit typography
+Text(
+  'Heading 1',
+  style: EwaTypography.heading1,
+);
+
+Text(
+  'Body text',
+  style: EwaTypography.bodyMedium,
+);
+```
+
+### Spacing System
+
+Consistent spacing using the 8-point grid system:
+
+```dart
+// Using EWA Kit spacing
+Padding(
+  padding: EdgeInsets.all(EwaDimension.size16),
+  child: Text('Consistently spaced content'),
+);
+
+Gap(EwaDimension.size8); // Using gap package for consistent spacing
+```
+
+## Responsive Design
+
+EWA Kit leverages `flutter_screenutil` to provide responsive design capabilities that adapt to different screen sizes and densities:
+
+```dart
+// Initialize ScreenUtil in your main.dart
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return EwaApp(
+      designSize: const Size(375, 812), // Reference design size (iPhone X)
+      minTextAdapt: true,
+      splitScreenMode: true,
+      child: MaterialApp(
+        title: 'Your App',
+        home: const HomePage(),
+      ),
+    );
+  }
+}
+```
+
+### Using Responsive Units
+
+```dart
+// Responsive sizing
+Container(
+  width: 100.w,  // 100 pixels wide relative to screen width
+  height: 50.h,  // 50 pixels high relative to screen height
+  child: Text(
+    'Responsive Text',
+    style: TextStyle(
+      fontSize: 16.sp, // Font size that scales with screen density
+    ),
+  ),
+);
+
+// Responsive padding
+Padding(
+  padding: EdgeInsets.all(16.r), // Padding that scales responsively
+  child: Text('Content'),
+);
+```
+
+## EwaApp Component
+
+The `EwaApp` component is a convenience wrapper that initializes `flutter_screenutil` for responsive design. It simplifies the setup process by providing sensible defaults while allowing customization:
+
+```dart
+EwaApp(
+  designSize: const Size(375, 812), // Reference design size (iPhone X)
+  minTextAdapt: true,               // Adapt text size to screen
+  splitScreenMode: true,            // Support for split screen mode
+  child: MaterialApp(...),          // Your app's MaterialApp
+)
+```
+
+### Parameters
+
+- `designSize`: The reference design size for your app (default: iPhone X size 375×812)
+- `minTextAdapt`: Whether to adapt text size to screen (default: true)
+- `splitScreenMode`: Whether to support split screen mode (default: true)
+- `child`: The widget to wrap (typically your MaterialApp)
+
+### Usage Example
+
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return EwaApp(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      child: MaterialApp(
+        title: 'Your App',
+        home: const HomePage(),
+      ),
+    );
+  }
+}
 ```
 
 ## Dark Mode
@@ -1046,6 +1489,23 @@ These are automatically installed when you add EWA Kit to your project.
 
 This project is licensed under the MIT License.
 
+## Best Practices
+
+To get the most out of EWA Kit, follow these best practices:
+
+1. **Initialize Properly**: Always call `EwaKit.initialize()` before running your app
+2. **Use Theme Integration**: Leverage EWA Kit's color foundation for consistent theming
+3. **Leverage Responsive Design**: Use `flutter_screenutil` for adaptive layouts
+4. **Implement Validation**: Use built-in validators for form fields
+5. **Handle Errors Gracefully**: Implement proper error handling in HTTP clients
+6. **Use Logging**: Utilize `EwaLogger` for debugging and monitoring
+7. **Customize Responsibly**: Use customization options to match your brand, not to create inconsistency
+
 ## Support
 
+For issues, questions, or contributions, please contact the development team.
+
+For issues, questions, or contributions, please contact the development team.
+
+For issues, questions, or contributions, please contact the development team.
 For issues, questions, or contributions, please contact the development team.
