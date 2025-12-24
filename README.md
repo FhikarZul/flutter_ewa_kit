@@ -51,6 +51,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
   - [Bottom Sheets](#bottom-sheets)
   - [Images](#images)
   - [Lazy Load](#lazy-load)
+  - [Permission Utilities](#permission-utilities)
 - [Foundations](#foundations)
   - [Color System](#color-system)
   - [Typography](#typography)
@@ -863,6 +864,101 @@ EwaLazyLoad(
 
 ````
 
+### Permission Utilities
+
+Request and manage device permissions with built-in UI components for a consistent user experience:
+
+```dart
+// Request a single permission with UI
+final granted = await EwaPermissionHelper.requestPermission(
+  Permission.camera,
+  context: context,
+  title: 'Camera Permission Required',
+  message: 'This app needs access to your camera to take photos',
+);
+
+if (granted) {
+  // Permission granted, proceed with camera functionality
+} else {
+  // Permission denied, handle accordingly
+}
+
+// Request specific common permissions
+final cameraGranted = await EwaPermissionHelper.requestCameraPermission(
+  context: context,
+);
+
+final storageGranted = await EwaPermissionHelper.requestStoragePermission(
+  context: context,
+);
+
+final locationGranted = await EwaPermissionHelper.requestLocationPermission(
+  context: context,
+);
+
+final microphoneGranted = await EwaPermissionHelper.requestMicrophonePermission(
+  context: context,
+);
+
+final notificationGranted = await EwaPermissionHelper.requestNotificationPermission(
+  context: context,
+);
+
+// Check permission status
+final isCameraGranted = await EwaPermissionHelper.isPermissionGranted(Permission.camera);
+final isCameraDenied = await EwaPermissionHelper.isPermissionDenied(Permission.camera);
+final isCameraPermanentlyDenied = await EwaPermissionHelper.isPermissionPermanentlyDenied(Permission.camera);
+final isCameraRestricted = await EwaPermissionHelper.isPermissionRestricted(Permission.camera);
+
+// Request multiple permissions at once
+final results = await EwaPermissionHelper.requestPermissions(
+  [Permission.camera, Permission.storage, Permission.location],
+  context: context,
+);
+
+// Use the permission widget for UI
+EwaPermissionWidget(
+  permission: Permission.camera,
+  title: 'Camera Access',
+  description: 'This app needs access to your camera to take photos',
+  onStatusChanged: (status) {
+    // Handle status change
+  },
+)
+
+// Use the permissions widget for multiple permissions
+EwaPermissionsWidget(
+  permissions: [
+    EwaPermissionData(
+      permission: Permission.camera,
+      title: 'Camera',
+      description: 'Access to take photos',
+    ),
+    EwaPermissionData(
+      permission: Permission.storage,
+      title: 'Storage',
+      description: 'Access to save photos',
+    ),
+  ],
+  onStatusChanged: (statuses) {
+    // Handle all status changes
+  },
+)
+```
+
+EwaPermissionHelper provides:
+
+- **Permission request helpers**: Simplified methods for requesting common permissions
+- **UI integration**: Built-in dialogs for permission requests using EWA Kit design
+- **Status checking**: Methods to check current permission status
+- **Multiple permission handling**: Request several permissions at once
+- **Settings redirection**: Automatically guide users to app settings when permissions are permanently denied
+- **Permission widgets**: Ready-to-use UI components for displaying permission status
+
+The permission utilities handle all the complexity of the permission_handler package while providing a consistent UI experience that matches the rest of the EWA Kit components.
+
+````
+
 ## Utilities
 
 ### DateTime Converter
@@ -908,7 +1004,7 @@ final startOfDay = EwaDateTimeConverter.startOfDay(DateTime.now());
 final endOfDay = EwaDateTimeConverter.endOfDay(DateTime.now());
 final age = EwaDateTimeConverter.calculateAge(birthDate);
 final durationFormatted = EwaDateTimeConverter.formatDuration(Duration(hours: 2, minutes: 30));
-````
+```
 
 The DateTime converter includes robust error handling with automatic fallback to English formatting if Indonesian locale data is not properly initialized.
 

@@ -45,6 +45,9 @@ dependencies:
   # Cached network image with placeholder and error handling
   cached_network_image: ^3.4.1
 
+  # Device permissions management
+  permission_handler: ^11.1.0
+
 dev_dependencies:
   # Part of the Flutter SDK testing framework
   flutter_test:

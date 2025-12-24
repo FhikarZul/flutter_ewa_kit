@@ -5,6 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 // Import the HTTP example screen
 import 'http_example.dart';
 
+// Import permission utilities
+import 'package:permission_handler/permission_handler.dart';
+import 'package:ewa_kit/utils/utils.dart';
+
 class DemoScreen extends StatefulWidget {
   final VoidCallback? onThemeToggle;
 
@@ -779,6 +783,57 @@ class _DemoScreenState extends State<DemoScreen> {
                       builder: (context) => const HttpExampleScreen(),
                     ),
                   );
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // Permission Utilities Example
+              Text(
+                'Permission Utilities Example',
+                style: EwaTypography.headingLg(),
+              ),
+              const SizedBox(height: 16),
+              // Permission widget for camera
+              Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  border: Border.all(color: EwaColorFoundation.neutral200),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: EwaPermissionWidget(
+                    permission: Permission.camera,
+                    title: 'Camera Access',
+                    description: 'This app needs camera access to take photos',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Permission widget for storage
+              Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  border: Border.all(color: EwaColorFoundation.neutral200),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: EwaPermissionWidget(
+                    permission: Permission.storage,
+                    title: 'Storage Access',
+                    description: 'This app needs storage access to save files',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Button to request multiple permissions
+              EwaButton.primary(
+                label: 'Request Multiple Permissions',
+                onPressed: () async {
+                  await EwaPermissionHelper.requestPermissions([
+                    Permission.camera,
+                    Permission.storage,
+                    Permission.location,
+                  ], context: context);
                 },
               ),
             ],
