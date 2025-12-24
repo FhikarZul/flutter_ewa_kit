@@ -162,7 +162,7 @@ class _EwaPermissionWidgetState extends State<EwaPermissionWidget> {
           const SizedBox(height: 8),
           Text(
             widget.description,
-            style: EwaTypography.bodySm()?.copyWith(color: Colors.grey[600]),
+            style: EwaTypography.bodySm().copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 12),
           if (_status != PermissionStatus.granted)
@@ -287,7 +287,7 @@ class _EwaPermissionsWidgetState extends State<EwaPermissionsWidget> {
             const SizedBox(height: 8),
             Text(
               widget.description,
-              style: EwaTypography.body()?.copyWith(color: Colors.grey[600]),
+              style: EwaTypography.body().copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
           ],
