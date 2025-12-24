@@ -2,6 +2,7 @@ export 'ui/button/button.dart';
 export 'ui/button/enums/enums.dart';
 export 'ui/bottom_sheet/bottom_sheet.dart';
 export 'ui/dialog/dialog.dart';
+export 'ui/image/image.dart';
 export 'ui/lazy_load/lazy_load.dart';
 export 'ui/loading/loading.dart';
 export 'ui/textfield/textfield.dart';

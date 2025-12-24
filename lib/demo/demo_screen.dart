@@ -682,7 +682,90 @@ class _DemoScreenState extends State<DemoScreen> {
                 ),
               ),
 
-              // HTTP Client Example
+              // Image Examples
+              const SizedBox(height: 32),
+              Text('Image Examples', style: EwaTypography.headingLg()),
+              const SizedBox(height: 16),
+              // Network image with caching
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  border: Border.all(color: EwaColorFoundation.neutral200),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: EwaImage.network(
+                    imageUrl: 'https://picsum.photos/536/354',
+                    width: 150,
+                    height: 150,
+                    borderRadius: 12.0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Network image with custom placeholder and error widgets
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  border: Border.all(color: EwaColorFoundation.neutral200),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: EwaImage.network(
+                    imageUrl: 'https://invalid-url-for-test.com/image.jpg',
+                    width: 150,
+                    height: 150,
+                    placeholder: Container(
+                      width: 150,
+                      height: 150,
+                      color: EwaColorFoundation.neutral100,
+                      child: const Icon(Icons.image, color: Colors.grey),
+                    ),
+                    errorWidget: Container(
+                      width: 150,
+                      height: 150,
+                      color: EwaColorFoundation.errorLight.withOpacity(0.1),
+                      child: const Icon(Icons.broken_image, color: Colors.red),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Asset image
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  border: Border.all(color: EwaColorFoundation.neutral200),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: EwaImage.asset(
+                    assetPath:
+                        'assets/images/placeholder.png', // This will show error widget since asset doesn't exist
+                    width: 150,
+                    height: 150,
+                    borderRadius: 8.0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Network image with no progress indicator
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  border: Border.all(color: EwaColorFoundation.neutral200),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: EwaImage.network(
+                    imageUrl:
+                        'https://via.placeholder.com/150/4a86e8/FFFFFF?text=No+Progress',
+                    width: 150,
+                    height: 150,
+                    showProgressIndicator: false,
+                  ),
+                ),
+              ),
               const SizedBox(height: 32),
               Text('HTTP Client Example', style: EwaTypography.headingLg()),
               const SizedBox(height: 16),

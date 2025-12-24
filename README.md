@@ -49,6 +49,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
   - [Toast Notifications](#toast-notifications)
   - [Loading Indicators](#loading-indicators)
   - [Bottom Sheets](#bottom-sheets)
+  - [Images](#images)
   - [Lazy Load](#lazy-load)
 - [Foundations](#foundations)
   - [Color System](#color-system)
@@ -700,7 +701,7 @@ EwaLoading.bouncingDots(label: 'Loading data...', size: 40);
 
 Modal bottom sheets for presenting options or content:
 
-```dart
+````dart
 // Options bottom sheet
 await EwaBottomSheet.showOptions(
   context: context,
@@ -752,7 +753,66 @@ await EwaBottomSheet.show(
     ),
   ],
 );
-```
+
+### Images
+
+Display network and asset images with caching, placeholder, and error handling:
+
+```dart
+// Network image with caching
+EwaImage.network(
+  imageUrl: 'https://example.com/image.jpg',
+  width: 200,
+  height: 200,
+  borderRadius: 12.0,
+);
+
+// Network image with custom placeholder and error widgets
+EwaImage.network(
+  imageUrl: 'https://example.com/image.jpg',
+  width: 200,
+  height: 200,
+  placeholder: Container(
+    width: 200,
+    height: 200,
+    color: Colors.grey[300],
+    child: const Icon(Icons.image, color: Colors.grey),
+  ),
+  errorWidget: Container(
+    width: 200,
+    height: 200,
+    color: Colors.red[100],
+    child: const Icon(Icons.broken_image, color: Colors.red),
+  ),
+);
+
+// Asset image
+EwaImage.asset(
+  assetPath: 'assets/images/placeholder.png',
+  width: 150,
+  height: 150,
+);
+
+// Network image with no progress indicator
+EwaImage.network(
+  imageUrl: 'https://example.com/image.jpg',
+  width: 200,
+  height: 200,
+  showProgressIndicator: false,
+);
+````
+
+EwaImage provides:
+
+- **Network image caching**: Automatic caching of network images with CachedNetworkImage
+- **Placeholder support**: Customizable loading placeholders
+- **Error handling**: Customizable error widgets when images fail to load
+- **Progress indicators**: Optional circular progress indicators during loading
+- **Border radius**: Configurable border radius for rounded corners
+- **Asset support**: Support for local asset images as well as network images
+- **Responsive sizing**: Support for responsive width and height using flutter_screenutil
+
+````
 
 ### Lazy Load
 
@@ -783,7 +843,7 @@ EwaLazyLoad(
   },
   emptyMessage: 'Tidak ada data tersedia', // Message to show when no data is available
 );
-```
+````
 
 #### Key Features
 

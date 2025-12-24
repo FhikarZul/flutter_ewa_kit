@@ -42,6 +42,9 @@ dependencies:
   # Path provider for accessing device directories
   path_provider: ^2.1.5
 
+  # Cached network image with placeholder and error handling
+  cached_network_image: ^3.4.1
+
 dev_dependencies:
   # Part of the Flutter SDK testing framework
   flutter_test:
