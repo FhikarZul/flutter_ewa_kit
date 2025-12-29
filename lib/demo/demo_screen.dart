@@ -7,7 +7,6 @@ import 'http_example.dart';
 
 // Import permission utilities
 import 'package:permission_handler/permission_handler.dart';
-import 'package:ewa_kit/utils/utils.dart';
 
 class DemoScreen extends StatefulWidget {
   final VoidCallback? onThemeToggle;
@@ -835,6 +834,111 @@ class _DemoScreenState extends State<DemoScreen> {
                     Permission.location,
                   ], context: context);
                 },
+              ),
+              const SizedBox(height: 32),
+
+              // Connectivity Checker Example
+              Text('Connectivity Checker', style: EwaTypography.headingLg()),
+              const SizedBox(height: 16),
+              // Connectivity Widget
+              Container(
+                padding: EdgeInsets.all(16.r),
+                decoration: BoxDecoration(
+                  color: EwaColorFoundation.neutral50,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: EwaColorFoundation.neutral200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Real-time Connectivity Status',
+                      style: EwaTypography.body(),
+                    ),
+                    const SizedBox(height: 12),
+                    const EwaConnectivityWidget(
+                      showIcon: true,
+                      showText: true,
+                      useIndonesian: true,
+                    ),
+                    const SizedBox(height: 16),
+                    const EwaConnectivityWidget(
+                      showIcon: true,
+                      showText: true,
+                      useIndonesian: false,
+                      compact: true,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Check connectivity status programmatically:',
+                      style: EwaTypography.bodySm(),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        EwaButton.primary(
+                          label: 'Check Connection',
+                          size: EwaButtonSize.sm,
+                          onPressed: () async {
+                            final hasConnection = await EwaConnectivityChecker
+                                .instance
+                                .hasConnection;
+                            final hasInternet = await EwaConnectivityChecker
+                                .instance
+                                .hasInternetAccess;
+
+                            if (!context.mounted) return;
+                            EwaDialog.showAlert(
+                              context: context,
+                              title: 'Status Koneksi',
+                              message:
+                                  'Koneksi: ${hasConnection ? "Ada" : "Tidak Ada"}\nInternet: ${hasInternet ? "Aktif" : "Tidak Aktif"}',
+                            );
+                          },
+                        ),
+                        EwaButton.secondary(
+                          label: 'Check WiFi',
+                          size: EwaButtonSize.sm,
+                          onPressed: () async {
+                            final isWifi =
+                                await EwaConnectivityChecker.instance.isWifi;
+                            if (!context.mounted) return;
+                            EwaToast.showInfo(
+                              context,
+                              isWifi
+                                  ? 'Terhubung ke WiFi'
+                                  : 'Tidak terhubung ke WiFi',
+                            );
+                          },
+                        ),
+                        EwaButton.tertiary(
+                          label: 'Check Mobile',
+                          size: EwaButtonSize.sm,
+                          onPressed: () async {
+                            final isMobile =
+                                await EwaConnectivityChecker.instance.isMobile;
+                            if (!context.mounted) return;
+                            EwaToast.showInfo(
+                              context,
+                              isMobile
+                                  ? 'Menggunakan Data Seluler'
+                                  : 'Tidak menggunakan Data Seluler',
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Note: Wrap your app with EwaConnectivityBanner to show automatic banner when offline',
+                style: EwaTypography.bodySm(
+                  color: EwaColorFoundation.neutral600,
+                ),
               ),
             ],
           ),

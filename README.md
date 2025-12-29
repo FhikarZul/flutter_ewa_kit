@@ -37,6 +37,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
 - 📦 **Design System Foundations** - Complete design system with spacing, colors, and typography
 - 🇮🇩 **Indonesian Market Focus** - Specialized features for Indonesian financial applications and localization
 - 🛠️ **Utility Functions** - Comprehensive utilities for logging, date handling, and more
+- 🌐 **Connectivity Checker** - Real-time network connectivity monitoring with automatic status updates and UI widgets
 
 ## Table of Contents
 
@@ -52,6 +53,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
   - [Images](#images)
   - [Lazy Load](#lazy-load)
   - [Permission Utilities](#permission-utilities)
+  - [Connectivity Checker](#connectivity-checker)
 - [Foundations](#foundations)
   - [Color System](#color-system)
   - [Typography](#typography)
@@ -62,6 +64,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
   - [DateTime Converter](#datetime-converter)
   - [HTTP Client](#http-client)
   - [Logging](#logging)
+  - [Connectivity Checker](#connectivity-checker-1)
 - [Customization](#customization)
   - [Color Foundation](#color-foundation)
 - [Dark Mode](#dark-mode)
@@ -959,6 +962,120 @@ The permission utilities handle all the complexity of the permission_handler pac
 
 ````
 
+### Connectivity Checker
+
+Real-time network connectivity monitoring with automatic status updates, UI widgets, and support for both Indonesian and English languages. Monitor WiFi, mobile data, ethernet, VPN, and actual internet access:
+
+```dart
+// Initialize connectivity checker (usually in main.dart or app startup)
+await EwaConnectivityChecker.instance.initialize();
+
+// Check current connection status
+final hasConnection = await EwaConnectivityChecker.instance.hasConnection;
+final hasInternet = await EwaConnectivityChecker.instance.hasInternetAccess;
+
+// Check specific connection type
+final isWifi = await EwaConnectivityChecker.instance.isWifi;
+final isMobile = await EwaConnectivityChecker.instance.isMobile;
+final isOffline = await EwaConnectivityChecker.instance.isOffline;
+
+// Listen to real-time connectivity changes
+EwaConnectivityChecker.instance.connectivityStream.listen((status) {
+  switch (status) {
+    case EwaConnectivityStatus.wifi:
+      print('Connected via WiFi');
+      break;
+    case EwaConnectivityStatus.mobile:
+      print('Connected via Mobile Data');
+      break;
+    case EwaConnectivityStatus.offline:
+      print('Device is offline');
+      break;
+    case EwaConnectivityStatus.noInternet:
+      print('Connected but no internet access');
+      break;
+    default:
+      print('Other connection type');
+  }
+});
+
+// Display connectivity status widget (Indonesian)
+EwaConnectivityWidget(
+  showIcon: true,
+  showText: true,
+  useIndonesian: true,
+  onStatusChanged: (status) {
+    print('Status changed to: $status');
+  },
+)
+
+// Display connectivity status widget (English, compact)
+EwaConnectivityWidget(
+  showIcon: true,
+  showText: true,
+  useIndonesian: false,
+  compact: true,
+)
+
+// Wrap your app with automatic offline banner
+Scaffold(
+  body: EwaConnectivityBanner(
+    showAtTop: true,  // or false for bottom
+    useIndonesian: true,
+    onlyShowWhenOffline: false,  // also show when no internet
+    child: YourContentWidget(),
+  ),
+)
+
+// Custom banner
+EwaConnectivityBanner(
+  customBanner: Container(
+    color: Colors.red,
+    padding: EdgeInsets.all(8),
+    child: Text('Custom offline message'),
+  ),
+  child: YourContent(),
+)
+
+// Block actions when offline
+EwaButton.primary(
+  label: 'Submit',
+  onPressed: () async {
+    final hasInternet = await EwaConnectivityChecker.instance.hasInternetAccess;
+
+    if (!hasInternet) {
+      EwaToast.showError(context, 'Tidak ada koneksi internet!');
+      return;
+    }
+
+    // Proceed with API call
+    await submitData();
+  },
+)
+```
+
+#### Available Connectivity Status
+
+- `EwaConnectivityStatus.wifi` - Connected to WiFi with internet access
+- `EwaConnectivityStatus.mobile` - Connected to mobile data with internet access
+- `EwaConnectivityStatus.ethernet` - Connected to ethernet with internet access
+- `EwaConnectivityStatus.vpn` - Connected to VPN with internet access
+- `EwaConnectivityStatus.bluetooth` - Connected via Bluetooth
+- `EwaConnectivityStatus.noInternet` - Has network connection but no internet access
+- `EwaConnectivityStatus.offline` - No network connection at all
+
+EwaConnectivityChecker provides:
+
+- **Real-time monitoring**: Stream-based connectivity status updates
+- **Actual internet check**: Distinguishes between network connection and actual internet access
+- **Multiple connection types**: WiFi, Mobile Data, Ethernet, VPN, Bluetooth
+- **UI widgets**: Ready-to-use widgets for displaying connection status
+- **Automatic banners**: Show/hide banners based on connectivity
+- **Bilingual support**: Indonesian and English status descriptions
+- **Helper methods**: Convenient methods to check various connection states
+
+````
+
 ## Utilities
 
 ### DateTime Converter
@@ -1208,6 +1325,65 @@ EwaLogger.trace('Entering function validateUserData');
 
 The logger provides colored output for better readability in console logs and includes timestamps for easier debugging. All log messages are automatically prefixed with the log level emoji for quick visual identification.
 
+### Connectivity Checker
+
+Comprehensive real-time network connectivity monitoring with automatic status detection and UI integration. Supports both network connection detection and actual internet access verification:
+
+```dart
+// Initialize the connectivity checker
+await EwaConnectivityChecker.instance.initialize();
+
+// Get current connectivity status
+final currentStatus = EwaConnectivityChecker.instance.currentStatus;
+
+// Check various connection states
+final hasConnection = await EwaConnectivityChecker.instance.hasConnection;
+final hasInternet = await EwaConnectivityChecker.instance.hasInternetAccess;
+final isWifi = await EwaConnectivityChecker.instance.isWifi;
+final isMobile = await EwaConnectivityChecker.instance.isMobile;
+final isOffline = await EwaConnectivityChecker.instance.isOffline;
+
+// Listen to connectivity changes
+EwaConnectivityChecker.instance.connectivityStream.listen((status) {
+  print('Connectivity changed to: ${status}');
+});
+
+// Get human-readable status description
+final description = EwaConnectivityChecker.instance.getStatusDescription(
+  EwaConnectivityStatus.wifi,
+  useIndonesian: true, // Use Indonesian language
+);
+// Output: "Terhubung ke WiFi"
+
+// Display connectivity widget
+EwaConnectivityWidget(
+  showIcon: true,
+  showText: true,
+  useIndonesian: true,
+  compact: false,
+  onStatusChanged: (status) {
+    // Handle status changes
+  },
+)
+
+// Use connectivity banner
+EwaConnectivityBanner(
+  showAtTop: true,
+  useIndonesian: true,
+  onlyShowWhenOffline: false,
+  child: YourWidget(),
+)
+```
+
+The connectivity checker provides:
+
+- **Real-time monitoring** with stream-based updates
+- **Dual-layer detection**: Network connection AND actual internet access
+- **Multiple connection types**: WiFi, Mobile Data, Ethernet, VPN, Bluetooth
+- **Bilingual support**: Indonesian and English descriptions
+- **UI components**: Ready-to-use widgets and banners
+- **Singleton pattern**: Consistent state across the app
+
 ## Customization
 
 ### All Button Parameters
@@ -1322,16 +1498,37 @@ Container(
   ),
   child: Text('Themed Text'),
 );
+
+// Using success and warning colors
+Container(
+  color: EwaColorFoundation.resolveColor(
+    context,
+    EwaColorFoundation.successLight,
+    EwaColorFoundation.successDark,
+  ),
+  child: Text('Success Message'),
+);
+
+Container(
+  color: EwaColorFoundation.resolveColor(
+    context,
+    EwaColorFoundation.warningLight,
+    EwaColorFoundation.warningDark,
+  ),
+  child: Text('Warning Message'),
+);
 ```
 
 The color foundation includes:
 
 - **Primary Colors**: Main brand colors for primary actions
 - **Secondary Colors**: Supporting colors for secondary actions
-- **Neutral Colors**: Grayscale colors for backgrounds, text, and borders
+- **Neutral Colors**: Grayscale colors for backgrounds, text, and borders (10 shades: neutral10 to neutral900)
 - **Error Colors**: Colors for error states and destructive actions
 - **Success Colors**: Colors for success states and positive actions
 - **Warning Colors**: Colors for warning states and cautionary actions
+- **Text Colors**: Optimized colors for text in light and dark themes
+- **Background Colors**: Surface colors for light and dark themes
 
 All colors automatically adapt to light and dark themes, ensuring consistent appearance across different theme modes.
 
@@ -1674,7 +1871,14 @@ EWA Kit depends on the following packages:
 - `flutter_spinkit` - Loading indicators
 - `gap` - Spacing utilities
 - `dio` - HTTP client
+- `dio_cache_interceptor` - HTTP caching support
 - `path_provider` - File system access
+- `cached_network_image` - Image caching
+- `permission_handler` - Device permissions management
+- `connectivity_plus` - Network connectivity monitoring
+- `internet_connection_checker_plus` - Internet access verification
+- `intl` - Internationalization support
+- `logger` - Enhanced logging
 
 These are automatically installed when you add EWA Kit to your project.
 
@@ -1697,8 +1901,4 @@ To get the most out of EWA Kit, follow these best practices:
 ## Support
 
 For issues, questions, or contributions, please contact the development team.
-
-For issues, questions, or contributions, please contact the development team.
-
-For issues, questions, or contributions, please contact the development team.
-For issues, questions, or contributions, please contact the development team.
+````
