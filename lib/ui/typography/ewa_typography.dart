@@ -1,8 +1,7 @@
+import 'package:ewa_kit/ui/typography/ewa_typography_token.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import 'ewa_typography_token.dart';
 
 class EwaTypography {
   const EwaTypography._();
@@ -16,16 +15,22 @@ class EwaTypography {
     double? height,
     double? letterSpacing,
     double? wordSpacing,
-  }) => GoogleFonts.poppins(
-    fontSize: (fontSize ?? EwaTypographyToken.body.fontSize) * 1.sp,
-    color: color,
-    fontWeight: fontWeight ?? EwaTypographyToken.body.fontWeight,
-    decoration: decoration,
-    height: height,
-    letterSpacing: letterSpacing,
-    wordSpacing: wordSpacing,
-    fontFeatures: fontFeatures,
-  );
+  }) {
+    final baseSize = fontSize ?? EwaTypographyToken.body.fontSize;
+    final scaledSize = baseSize * 1.sp;
+    final safeFontSize =
+        scaledSize.isFinite && scaledSize > 0 ? scaledSize : baseSize;
+    return GoogleFonts.poppins(
+      fontSize: safeFontSize,
+      color: color,
+      fontWeight: fontWeight ?? EwaTypographyToken.body.fontWeight,
+      decoration: decoration,
+      height: height,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      fontFeatures: fontFeatures,
+    );
+  }
 
   static TextStyle heading3Xl({
     Color? color,

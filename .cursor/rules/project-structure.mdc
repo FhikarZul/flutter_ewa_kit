@@ -1,0 +1,54 @@
+---
+description: EWA Kit project structure and layer conventions
+globs: lib/**/*.dart
+alwaysApply: false
+---
+
+# EWA Kit Project Structure
+
+## Layer Separation
+
+Keep these layers distinct and consistent:
+
+### `lib/ui/` — UI Components (Widgets)
+- All **widgets** (components that extend `StatelessWidget` or `StatefulWidget`)
+- Include: button, dialog, toast, textfield, connectivity, permission, etc.
+- Pattern: `ui/<feature>/ewa_<feature>_widget.dart` + `feature.dart` (barrel)
+
+```
+lib/ui/
+  button/       → EwaButton
+  connectivity/ → EwaConnectivityWidget, EwaConnectivityBanner
+  permission/   → EwaPermissionWidget, EwaPermissionsWidget, EwaPermissionData
+```
+
+### `lib/utils/` — Non-UI Utilities
+- **Logic, helpers, converters, network** — no Widget classes
+- Include: logger, datetime converter, connectivity checker, permission helper, HTTP client
+- Pattern: `utils/<feature>/ewa_<feature>_checker.dart` or `_helper.dart`
+
+```
+lib/utils/
+  connectivity/ → EwaConnectivityChecker (logic only)
+  permission/   → EwaPermissionHelper (logic only)
+  network/      → EwaHttpClient, EwaResponseException, interceptors
+  ewa_logger.dart
+  ewa_datetime_converter.dart
+```
+
+### `lib/foundations/` — Design Tokens
+- Color, size, theme, config — shared design system
+
+## Rules
+
+1. **No widgets in `utils/`** — if it builds UI, it belongs in `ui/`
+2. **Utils can be used by UI** — e.g. `ui/connectivity` imports `utils/connectivity/ewa_connectivity_checker`
+3. **Data classes** — if tied to a widget (e.g. `EwaPermissionData`), place with the widget in `ui/`
+4. **Barrel exports** — each feature folder has a `feature.dart` that exports public API
+
+## Adding New Features
+
+- **New widget?** → `lib/ui/<feature>/`
+- **New helper/checker/network?** → `lib/utils/<feature>/`
+- **New design token?** → `lib/foundations/`
+- **After adding/modifying** → Update `CHANGELOG.md` and `README.md` (see `documentation-update.mdc`)

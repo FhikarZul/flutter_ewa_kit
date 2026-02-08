@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:ewa_kit/foundations/color/color.dart';
 import 'package:ewa_kit/foundations/size/size.dart';
 import 'package:ewa_kit/ui/button/button.dart';
 import 'package:ewa_kit/ui/typography/typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gap/gap.dart';
 
 /// A customizable dialog component for the EWA Kit
 ///
@@ -134,11 +137,25 @@ class _EwaDialogWidget<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final closeIconColor = EwaColorFoundation.resolveColor(
+      context,
+      EwaColorFoundation.neutral500,
+      EwaColorFoundation.neutral400,
+    );
+    final closeButtonBgColor = EwaColorFoundation.resolveColor(
+      context,
+      EwaColorFoundation.neutral200,
+      EwaColorFoundation.neutral700,
+    );
+
     return Dialog(
+      backgroundColor: surfaceColor,
+      elevation: 24,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: Container(
-        width: 300.w,
-        padding: EdgeInsets.all(20.r),
+        width: math.min(300.w, 400),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,29 +168,40 @@ class _EwaDialogWidget<T> extends StatelessWidget {
                   if (title != null)
                     Expanded(
                       child: Text(title!, style: EwaTypography.headingSm()),
-                    ),
+                    )
+                  else if (showCloseButton)
+                    const Spacer(),
                   if (showCloseButton)
                     IconButton(
-                      icon: Icon(
-                        Icons.close,
-                        size: 20.sp,
-                        color: EwaColorFoundation.neutral500,
-                      ),
+                      icon: Icon(Icons.close, size: 20.sp, color: closeIconColor),
                       onPressed: () => Navigator.pop(context),
+                      style: IconButton.styleFrom(
+                        backgroundColor: closeButtonBgColor,
+                        shape: const CircleBorder(),
+                        minimumSize: Size(32.r, 32.r),
+                        padding: EdgeInsets.all(6.r),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      tooltip: 'Close',
                     ),
                 ],
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
             ],
 
             // Message
             if (message != null) ...[
-              Text(message!, style: EwaTypography.body()),
-              SizedBox(height: 20.h),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 240.h),
+                child: SingleChildScrollView(
+                  child: Text(message!, style: EwaTypography.body()),
+                ),
+              ),
+              SizedBox(height: 16.h),
             ],
 
             // Custom content
-            if (content != null) ...[content!, SizedBox(height: 20.h)],
+            if (content != null) ...[content!, SizedBox(height: 16.h)],
 
             // Action buttons
             _buildActions(context),
@@ -207,16 +235,18 @@ class _EwaDialogWidget<T> extends StatelessWidget {
         // Spacer for alignment when there are 2 actions
         if (actions.length == 2) const Spacer(),
 
-        // Secondary and primary actions (right aligned)
-        if (secondaryAction != null)
+        // Secondary and primary actions (right aligned) with spacing
+        if (secondaryAction != null) ...[
           _buildActionButton(context, secondaryAction!, isSecondary: true),
+          if (primaryAction != null) Gap(EwaDimension.size12),
+        ],
         if (primaryAction != null) _buildActionButton(context, primaryAction!),
-      ].where((widget) => widget != null).cast<Widget>().toList(),
+      ],
     );
   }
 
   /// Builds a single action button
-  Widget? _buildActionButton(
+  Widget _buildActionButton(
     BuildContext context,
     EwaDialogAction action, {
     bool isSecondary = false,

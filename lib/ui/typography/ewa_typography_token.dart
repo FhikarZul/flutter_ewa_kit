@@ -1,5 +1,5 @@
+import 'package:ewa_kit/ui/typography/ewa_typography_data.dart';
 import 'package:flutter/material.dart';
-import 'ewa_typography_data.dart';
 
 class EwaTypographyToken {
   const EwaTypographyToken._();

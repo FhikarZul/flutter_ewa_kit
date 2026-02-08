@@ -20,10 +20,6 @@ void main() {
     });
 
     test('should have all neutral colors defined', () {
-      expect(EwaColorFoundation.neutral10, isNotNull);
-      expect(EwaColorFoundation.neutral20, isNotNull);
-      expect(EwaColorFoundation.neutral30, isNotNull);
-      expect(EwaColorFoundation.neutral40, isNotNull);
       expect(EwaColorFoundation.neutral50, isNotNull);
       expect(EwaColorFoundation.neutral100, isNotNull);
       expect(EwaColorFoundation.neutral200, isNotNull);

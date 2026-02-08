@@ -1,3 +1,4 @@
+import 'package:ewa_kit/foundations/config/ewa_kit_overrides.dart';
 import 'package:flutter/material.dart';
 
 /// Global configuration for EWA Kit components
@@ -31,12 +32,17 @@ class EwaKitConfig {
   /// Default spinner size for loading states
   static double spinnerSize = 20.0;
 
-  /// Reset all configurations to default values
+  /// Default locale for date formatting (default: id_ID)
+  static String defaultLocale = 'id_ID';
+
+  /// Reset all configurations and service overrides to default values
   static void resetToDefaults() {
     debounceDuration = const Duration(milliseconds: 500);
     designSize = const Size(375, 812);
     debugMode = false;
     borderWidth = 1.0;
     spinnerSize = 20.0;
+    defaultLocale = 'id_ID';
+    EwaKitOverrides.reset();
   }
 }

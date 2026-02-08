@@ -1,16 +1,17 @@
+import 'package:ewa_kit/foundations/config/ewa_kit_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class EwaApp extends StatelessWidget {
   final Widget? child;
-  final Size designSize;
+  final Size? designSize;
   final bool minTextAdapt;
   final bool splitScreenMode;
 
   const EwaApp({
     super.key,
     this.child,
-    this.designSize = const Size(375, 812), // Standard iPhone X size
+    this.designSize,
     this.minTextAdapt = true,
     this.splitScreenMode = true,
   });
@@ -18,9 +19,10 @@ class EwaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: designSize,
+      designSize: designSize ?? EwaKitConfig.designSize,
       minTextAdapt: minTextAdapt,
       splitScreenMode: splitScreenMode,
+      ensureScreenSize: true,
       child: child,
     );
   }

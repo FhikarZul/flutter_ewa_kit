@@ -1,5 +1,4 @@
 import 'package:ewa_kit/foundations/color/color.dart';
-import 'package:ewa_kit/foundations/size/size.dart';
 import 'package:ewa_kit/ui/typography/typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

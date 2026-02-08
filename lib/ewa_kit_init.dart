@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ewa_kit/foundations/config/ewa_kit_config.dart';
 import 'package:ewa_kit/utils/ewa_logger.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -12,8 +13,8 @@ import 'package:intl/date_symbol_data_local.dart';
 ///
 /// Usage:
 /// ```dart
-/// void main() {
-///   EwaKit.initialize(() {
+/// void main() async {
+///   await EwaKit.initialize(() {
 ///     runApp(const MyApp());
 ///   });
 /// }
@@ -21,15 +22,18 @@ import 'package:intl/date_symbol_data_local.dart';
 class EwaKit {
   EwaKit._();
 
-  /// Initializes all required dependencies for EWA Kit
-  static void initialize(void Function() startApp) {
+  /// Initializes all required dependencies for EWA Kit.
+  /// Returns a Future that completes when initialization is done.
+  /// Uses [EwaKitConfig.defaultLocale] for date formatting.
+  static Future<void> initialize(void Function() startApp) async {
     runZonedGuarded(
       () async {
-        // Ensure the Flutter binding is initialized
         WidgetsFlutterBinding.ensureInitialized();
 
-        // Initialize intl locale data for Indonesian
-        initializeDateFormatting('id_ID', null);
+        await initializeDateFormatting(
+          EwaKitConfig.defaultLocale,
+          null,
+        );
 
         FlutterError.onError = (details) {
           FlutterError.presentError(details);

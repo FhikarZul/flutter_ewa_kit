@@ -1,3 +1,5 @@
+import 'package:ewa_kit/foundations/color/color.dart';
+import 'package:ewa_kit/foundations/config/ewa_kit_config.dart';
 import 'package:ewa_kit/foundations/size/size.dart';
 import 'package:ewa_kit/utils/ewa_logger.dart';
 import 'package:flutter/material.dart';
@@ -7,18 +9,18 @@ import 'package:gap/gap.dart';
 import 'package:tap_debouncer/tap_debouncer.dart';
 import 'button.dart';
 
-/// Constants for EWA Button configuration
+/// Constants for EWA Button configuration (reads from EwaKitConfig)
 class EwaButtonConstants {
   const EwaButtonConstants._();
 
   /// Default debounce duration to prevent rapid clicks
-  static const debounceDuration = Duration(milliseconds: 500);
+  static Duration get debounceDuration => EwaKitConfig.debounceDuration;
 
   /// Default spinner size for loading state
-  static const defaultSpinnerSize = 20.0;
+  static double get defaultSpinnerSize => EwaKitConfig.spinnerSize;
 
   /// Default border width
-  static const borderWidth = 1.0;
+  static double get borderWidth => EwaKitConfig.borderWidth;
 }
 
 /// A customizable button widget with support for multiple variants,

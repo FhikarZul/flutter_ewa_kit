@@ -53,7 +53,19 @@ class EwaConnectivityChecker {
   // Singleton pattern
   EwaConnectivityChecker._();
   static final EwaConnectivityChecker _instance = EwaConnectivityChecker._();
-  static EwaConnectivityChecker get instance => _instance;
+  static EwaConnectivityChecker? _override;
+
+  /// Override the default instance (e.g. for testing). Use [EwaKitOverrides] for centralized config.
+  static set override(EwaConnectivityChecker? checker) {
+    _override = checker;
+  }
+
+  /// Clear the override to restore default instance.
+  static void clearOverride() {
+    _override = null;
+  }
+
+  static EwaConnectivityChecker get instance => _override ?? _instance;
 
   // Dependencies
   final Connectivity _connectivity = Connectivity();

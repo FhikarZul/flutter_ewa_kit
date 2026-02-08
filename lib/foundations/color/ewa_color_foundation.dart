@@ -24,11 +24,7 @@ class EwaColorFoundation {
   static const Color warningLight = Color(0xFFEA580C);
   static const Color warningDark = Color(0xFFFB923C);
 
-  // Neutral colors
-  static const Color neutral10 = Color(0xFFFAFAFA);
-  static const Color neutral20 = Color(0xFFF5F5F5);
-  static const Color neutral30 = Color(0xFFE5E5E5);
-  static const Color neutral40 = Color(0xFFD4D4D4);
+  // Neutral colors (scale 50=lightest to 900=darkest)
   static const Color neutral50 = Color(0xFFFAFAFA);
   static const Color neutral100 = Color(0xFFF5F5F5);
   static const Color neutral200 = Color(0xFFE5E5E5);

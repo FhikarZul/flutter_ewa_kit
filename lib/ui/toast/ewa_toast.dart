@@ -1,5 +1,4 @@
 import 'package:ewa_kit/foundations/color/color.dart';
-import 'package:ewa_kit/foundations/size/size.dart';
 import 'package:ewa_kit/ui/typography/typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,23 +12,39 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// ```
 class EwaToast {
   /// Shows a success toast notification
-  static void showSuccess(BuildContext context, String message) {
-    _showToast(context, message, EwaToastType.success);
+  static void showSuccess(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    _showToast(context, message, EwaToastType.success, duration: duration);
   }
 
   /// Shows an error toast notification
-  static void showError(BuildContext context, String message) {
-    _showToast(context, message, EwaToastType.error);
+  static void showError(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    _showToast(context, message, EwaToastType.error, duration: duration);
   }
 
   /// Shows an info toast notification
-  static void showInfo(BuildContext context, String message) {
-    _showToast(context, message, EwaToastType.info);
+  static void showInfo(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    _showToast(context, message, EwaToastType.info, duration: duration);
   }
 
   /// Shows a warning toast notification
-  static void showWarning(BuildContext context, String message) {
-    _showToast(context, message, EwaToastType.warning);
+  static void showWarning(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    _showToast(context, message, EwaToastType.warning, duration: duration);
   }
 
   /// Shows a custom toast notification
@@ -62,6 +77,8 @@ class EwaToast {
     IconData? icon,
     Duration duration = const Duration(seconds: 3),
   }) {
+    if (!context.mounted) return;
+
     final overlay = Overlay.of(context);
     late OverlayEntry overlayEntry;
 
@@ -72,19 +89,14 @@ class EwaToast {
         backgroundColor: backgroundColor,
         textColor: textColor,
         icon: icon,
-        onDismiss: () => overlayEntry.remove(),
+        onDismiss: () {
+          if (overlayEntry.mounted) overlayEntry.remove();
+        },
         duration: duration,
       ),
     );
 
     overlay.insert(overlayEntry);
-
-    // Auto dismiss after duration
-    Future.delayed(duration, () {
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
-    });
   }
 }
 
@@ -119,7 +131,7 @@ class _ToastWidgetState extends State<_ToastWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
-  late Future delayedDismissal;
+  bool _isDismissed = false;
 
   @override
   void initState() {
@@ -137,29 +149,33 @@ class _ToastWidgetState extends State<_ToastWidget>
     // Start animation
     _animationController.forward();
 
-    // Schedule dismissal
-    delayedDismissal = Future.delayed(widget.duration, _dismiss);
+    // Schedule auto dismissal
+    Future.delayed(widget.duration, _dismiss);
   }
 
   @override
   void dispose() {
-    // Cancel the delayed dismissal to prevent calling _dismiss after disposal
-    delayedDismissal.ignore();
+    _isDismissed = true;
     _animationController.dispose();
     super.dispose();
   }
 
   void _dismiss() {
-    // Check if the widget is still mounted before trying to animate
-    if (mounted) {
-      _animationController.reverse().then((_) {
-        widget.onDismiss();
-      });
-    }
+    if (_isDismissed || !mounted) return;
+    _isDismissed = true;
+
+    _animationController.reverse().then((_) {
+      if (mounted) widget.onDismiss();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final shadowColor = isDark
+        ? Colors.black.withValues(alpha: 0.3)
+        : Colors.black.withValues(alpha: 0.1);
+
     return Positioned(
       top: 60.h,
       left: 16.w,
@@ -172,16 +188,16 @@ class _ToastWidgetState extends State<_ToastWidget>
             child: Container(
               decoration: BoxDecoration(
                 color: _getBackgroundColor(context),
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: shadowColor,
                     blurRadius: 8.r,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -189,7 +205,7 @@ class _ToastWidgetState extends State<_ToastWidget>
                     Icon(
                       _getIcon(),
                       color: _getTextColor(context),
-                      size: 20.sp,
+                      size: 18.sp,
                     ),
                     SizedBox(width: 8.w),
                   ],
@@ -199,17 +215,24 @@ class _ToastWidgetState extends State<_ToastWidget>
                       style: EwaTypography.bodySm().copyWith(
                         color: _getTextColor(context),
                       ),
-                      maxLines: 3,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(width: 8.w),
-                  GestureDetector(
-                    onTap: _dismiss,
-                    child: Icon(
-                      Icons.close,
-                      color: _getTextColor(context),
-                      size: 16.sp,
+                  SizedBox(width: 4.w),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _dismiss,
+                      borderRadius: BorderRadius.circular(20.r),
+                      child: Padding(
+                        padding: EdgeInsets.all(6.r),
+                        child: Icon(
+                          Icons.close,
+                          color: _getTextColor(context),
+                          size: 16.sp,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -221,7 +244,7 @@ class _ToastWidgetState extends State<_ToastWidget>
     );
   }
 
-  /// Get background color based on toast type
+  /// Get background color based on toast type (theme-aware)
   Color _getBackgroundColor(BuildContext context) {
     if (widget.backgroundColor != null) {
       return widget.backgroundColor!;
@@ -229,19 +252,39 @@ class _ToastWidgetState extends State<_ToastWidget>
 
     switch (widget.type) {
       case EwaToastType.success:
-        return EwaColorFoundation.primaryLight;
+        return EwaColorFoundation.resolveColor(
+          context,
+          EwaColorFoundation.successLight,
+          EwaColorFoundation.successLight,
+        );
       case EwaToastType.error:
-        return EwaColorFoundation.errorLight;
+        return EwaColorFoundation.resolveColor(
+          context,
+          EwaColorFoundation.errorLight,
+          EwaColorFoundation.errorLight,
+        );
       case EwaToastType.info:
-        return EwaColorFoundation.neutral100;
+        return EwaColorFoundation.resolveColor(
+          context,
+          EwaColorFoundation.neutral100,
+          EwaColorFoundation.neutral700,
+        );
       case EwaToastType.warning:
-        return EwaColorFoundation.secondaryLight;
+        return EwaColorFoundation.resolveColor(
+          context,
+          EwaColorFoundation.warningLight,
+          EwaColorFoundation.warningLight,
+        );
       case EwaToastType.custom:
-        return EwaColorFoundation.neutral50;
+        return EwaColorFoundation.resolveColor(
+          context,
+          EwaColorFoundation.neutral50,
+          EwaColorFoundation.neutral700,
+        );
     }
   }
 
-  /// Get text color based on toast type
+  /// Get text color based on toast type (white on colored bg, theme-aware for neutral)
   Color _getTextColor(BuildContext context) {
     if (widget.textColor != null) {
       return widget.textColor!;
@@ -249,15 +292,16 @@ class _ToastWidgetState extends State<_ToastWidget>
 
     switch (widget.type) {
       case EwaToastType.success:
-        return EwaColorFoundation.primaryDark;
       case EwaToastType.error:
-        return EwaColorFoundation.errorDark;
-      case EwaToastType.info:
-        return EwaColorFoundation.neutral800;
       case EwaToastType.warning:
-        return EwaColorFoundation.secondaryDark;
+        return EwaColorFoundation.textDark;
+      case EwaToastType.info:
       case EwaToastType.custom:
-        return EwaColorFoundation.neutral800;
+        return EwaColorFoundation.resolveColor(
+          context,
+          EwaColorFoundation.neutral800,
+          EwaColorFoundation.neutral100,
+        );
     }
   }
 

@@ -68,6 +68,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
 - [Customization](#customization)
   - [Color Foundation](#color-foundation)
 - [Dark Mode](#dark-mode)
+- [Flexible Overrides](#flexible-overrides)
 - [Best Practices](#best-practices)
 - [Examples](#examples)
 
@@ -101,62 +102,40 @@ import 'package:ewa_kit/ewa_kit.dart';
 
 Note: EWA Kit internally handles all third-party dependencies like `flutter_screenutil`, so you don't need to import them separately.
 
-### 2. Initialize All EWA Kit Dependencies
+### 2. Initialize EWA Kit (Required)
 
-Some components in EWA Kit require additional initialization for optimal performance. Call `EwaKit.initialize()` before running your app:
+Call `EwaKit.initialize()` before running your app. This is **async** and must be awaited:
 
 ```dart
-void main() {
-  // Initialize EWA Kit
-  EwaKit.initialize(() {
+void main() async {
+  await EwaKit.initialize(() {
     runApp(const MyApp());
   });
 }
 ```
 
-The `EwaKit.initialize()` method handles the initialization of all required dependencies including:
+The `EwaKit.initialize()` method handles:
 
-- ScreenUtil configuration
-- Google Fonts loading
-- Default theme settings
-- Network client setup
-- Logger configuration
-- Internationalization settings (for Indonesian localization)
+- Flutter bindings
+- Date formatting (uses `EwaKitConfig.defaultLocale`, default: `id_ID`)
+- Global error handling and logging
 
-This ensures all components work correctly and have access to the required resources.
+### 3. Wrap with EwaApp (Required)
 
-### 3. Initialize Ewa App (Required)
-
-EWA Kit uses `flutter_screenutil` for responsive design. Wrap your MaterialApp with `EwaApp` (provided by EWA Kit) in your `main.dart`:
+EWA Kit uses `flutter_screenutil` for responsive design. Wrap your MaterialApp with `EwaApp`:
 
 ```dart
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return EwaApp(
-      designSize: const Size(375, 812), // iPhone X size (recommended)
-      minTextAdapt: true,
-      splitScreenMode: true,
+      // designSize is optional - uses EwaKitConfig.designSize if not specified
       child: MaterialApp(
         title: 'Your App',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepPurple,
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
+        theme: EwaTheme.light(),
+        darkTheme: EwaTheme.dark(),
         themeMode: ThemeMode.system,
         home: const HomePage(),
       ),
@@ -165,9 +144,37 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-### 4. Theme Integration
+### 4. Configuration (Optional)
 
-EWA Kit components automatically adapt to your app's theme. Ensure your MaterialApp has proper theme definitions:
+Customize EWA Kit via `EwaKitConfig` **before** `runApp()`:
+
+```dart
+void main() async {
+  // Optional: Configure before init
+  EwaKitConfig.designSize = const Size(414, 896); // iPhone 11 Pro Max
+  EwaKitConfig.debounceDuration = const Duration(milliseconds: 300);
+  EwaKitConfig.defaultLocale = 'en_US';
+
+  await EwaKit.initialize(() {
+    runApp(const MyApp());
+  });
+}
+```
+
+### 5. Theme Integration
+
+Use `EwaTheme` for pre-configured light/dark themes with EWA Kit colors:
+
+```dart
+MaterialApp(
+  theme: EwaTheme.light(),
+  darkTheme: EwaTheme.dark(),
+  themeMode: ThemeMode.system,
+  home: const HomePage(),
+);
+```
+
+Or build custom themes with `EwaColorFoundation`:
 
 ```dart
 MaterialApp(
@@ -175,27 +182,12 @@ MaterialApp(
     colorScheme: ColorScheme.fromSeed(
       seedColor: EwaColorFoundation.primaryLight,
       primary: EwaColorFoundation.primaryLight,
-      secondary: EwaColorFoundation.secondaryLight,
-      error: EwaColorFoundation.errorLight,
     ),
     useMaterial3: true,
   ),
-  darkTheme: ThemeData(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: EwaColorFoundation.primaryDark,
-      primary: EwaColorFoundation.primaryDark,
-      secondary: EwaColorFoundation.secondaryDark,
-      error: EwaColorFoundation.errorDark,
-      brightness: Brightness.dark,
-    ),
-    useMaterial3: true,
-  ),
-  themeMode: ThemeMode.system, // or ThemeMode.light, ThemeMode.dark
   home: const HomePage(),
 );
 ```
-
-Using EWA Kit's color foundation ensures consistent coloring across all components.
 
 ## Components
 
@@ -500,6 +492,21 @@ EwaTextField.secondary(
 EwaTextField.tertiary(
   hintText: 'Square TextField',
   borderRadius: 0.0,
+);
+```
+
+#### TextField Custom Colors
+
+Override background and border colors when needed. Use `EwaColorFoundation.resolveColor` for dark mode support:
+
+```dart
+EwaTextField.primary(
+  hintText: 'Custom styled',
+  fillColor: EwaColorFoundation.resolveColor(
+    context, EwaColorFoundation.neutral100, EwaColorFoundation.neutral700,
+  ),
+  enabledBorderColor: EwaColorFoundation.getSecondary(context),
+  focusedBorderColor: EwaColorFoundation.getPrimary(context),
 );
 ```
 
@@ -1137,13 +1144,16 @@ Initialize the HTTP client with your API configuration:
 final httpClient = EwaHttpClient();
 
 // Initialize with base URL and default headers
-httpClient.init(
+await httpClient.init(
   baseUrl: 'https://api.example.com',
   defaultHeaders: {'Content-Type': 'application/json'},
-  // Enable caching for offline support (optional)
   enableCaching: true,
   connectTimeout: const Duration(seconds: 30),
   receiveTimeout: const Duration(seconds: 30),
+  // Optional: Configure retry behavior (defaults: maxRetries=3, retryDelay=1s, maxRetryDuration=2min)
+  maxRetries: 5,
+  retryDelay: const Duration(seconds: 2),
+  maxRetryDuration: const Duration(minutes: 3),
 );
 ```
 
@@ -1252,13 +1262,12 @@ final response = await httpClient.get(
 
 #### Retry Logic
 
-The HTTP client implements infinite retry logic for transient failures with exponential backoff:
+The HTTP client implements configurable retry logic for transient failures with exponential backoff:
 
-- Automatically retries failed requests due to network issues
-- Respects retry-after headers from servers
+- Automatically retries failed requests due to network issues (connection timeout, 5xx errors)
+- Configurable via `init()`: `maxRetries` (default: 3), `retryDelay` (default: 1s), `maxRetryDuration` (default: 2 min)
 - Implements exponential backoff to avoid overwhelming servers
-- Maximum retry duration of 5 minutes to prevent indefinite hanging
-- Visible retry counters for debugging (e.g., 1/10, 2/10)
+- Visible retry counters for debugging
 
 #### Error Handling
 
@@ -1408,13 +1417,22 @@ EwaButton(
 
 ```dart
 EwaTextField(
+  controller: controller,              // Optional: TextEditingController
+  focusNode: focusNode,                // Optional: FocusNode (e.g. for next-field focus)
   hintText: 'Placeholder text',        // Optional: Placeholder text
   variant: EwaTextFieldVariant.primary,// Optional: TextField variant
   borderRadius: 8.0,                   // Optional: Custom border radius
+  fillColor: Colors.grey.shade100,     // Optional: Override background (use EwaColorFoundation for dark mode)
+  enabledBorderColor: Colors.blue,     // Optional: Override border when unfocused
+  focusedBorderColor: Colors.blue,     // Optional: Override border when focused
   obscureText: false,                  // Optional: Hide text (passwords)
   enabled: true,                       // Optional: Enable/disable field
   readOnly: false,                     // Optional: Read-only field
+  autofocus: false,                    // Optional: Auto-focus on build
   maxLines: 1,                         // Optional: Multi-line support
+  maxLength: 100,                      // Optional: Character limit
+  textCapitalization: TextCapitalization.none, // Optional: Text capitalization
+  inputFormatters: [...],              // Optional: Flutter input formatters
   onChanged: (value) {},               // Optional: Change callback
   onEditingComplete: () {},            // Optional: Editing complete callback
   onSubmitted: (value) {},             // Optional: Submit callback
@@ -1523,7 +1541,7 @@ The color foundation includes:
 
 - **Primary Colors**: Main brand colors for primary actions
 - **Secondary Colors**: Supporting colors for secondary actions
-- **Neutral Colors**: Grayscale colors for backgrounds, text, and borders (10 shades: neutral10 to neutral900)
+- **Neutral Colors**: Grayscale colors for backgrounds, text, and borders (neutral50 to neutral900)
 - **Error Colors**: Colors for error states and destructive actions
 - **Success Colors**: Colors for success states and positive actions
 - **Warning Colors**: Colors for warning states and cautionary actions
@@ -1646,44 +1664,49 @@ Padding(
 
 ## EwaApp Component
 
-The `EwaApp` component is a convenience wrapper that initializes `flutter_screenutil` for responsive design. It simplifies the setup process by providing sensible defaults while allowing customization:
+The `EwaApp` component initializes `flutter_screenutil` for responsive design:
 
 ```dart
 EwaApp(
-  designSize: const Size(375, 812), // Reference design size (iPhone X)
-  minTextAdapt: true,               // Adapt text size to screen
-  splitScreenMode: true,            // Support for split screen mode
-  child: MaterialApp(...),          // Your app's MaterialApp
+  designSize: const Size(375, 812), // Optional - uses EwaKitConfig.designSize if omitted
+  minTextAdapt: true,
+  splitScreenMode: true,
+  child: MaterialApp(...),
 )
 ```
 
 ### Parameters
 
-- `designSize`: The reference design size for your app (default: iPhone X size 375×812)
-- `minTextAdapt`: Whether to adapt text size to screen (default: true)
-- `splitScreenMode`: Whether to support split screen mode (default: true)
-- `child`: The widget to wrap (typically your MaterialApp)
+- `designSize`: Optional. Reference design size (falls back to `EwaKitConfig.designSize`)
+- `minTextAdapt`: Adapt text size to screen (default: true)
+- `splitScreenMode`: Support split screen mode (default: true)
+- `child`: The widget to wrap (typically MaterialApp)
 
-### Usage Example
+## EwaTheme
+
+Pre-configured themes using EWA Kit colors:
 
 ```dart
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return EwaApp(
-      designSize: const Size(375, 812),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      child: MaterialApp(
-        title: 'Your App',
-        home: const HomePage(),
-      ),
-    );
-  }
-}
+MaterialApp(
+  theme: EwaTheme.light(),
+  darkTheme: EwaTheme.dark(),
+  themeMode: ThemeMode.system,
+  home: const HomePage(),
+);
 ```
+
+## EwaKitConfig
+
+Global configuration for EWA Kit components. Set **before** `EwaKit.initialize()`:
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `designSize` | 375×812 | Reference size for responsive scaling |
+| `debounceDuration` | 500ms | Button debounce duration |
+| `defaultLocale` | id_ID | Locale for date formatting |
+| `borderWidth` | 1.0 | Default button border width |
+| `spinnerSize` | 20.0 | Loading spinner size |
+| `debugMode` | false | Enable debug logging |
 
 ## Dark Mode
 
@@ -1712,6 +1735,17 @@ MaterialApp(
 The buttons will automatically adjust their colors based on the current theme.
 
 ## Examples
+
+### Example App
+
+Run the included example app to explore all EWA Kit components interactively:
+
+```bash
+cd ewa_kit/example
+flutter run
+```
+
+The example includes demos for buttons, dialogs, toasts, HTTP client, and more.
 
 ### Complete Button Grid Example
 
@@ -1886,6 +1920,29 @@ These are automatically installed when you add EWA Kit to your project.
 
 This project is licensed under the MIT License.
 
+## Flexible Overrides
+
+Override default services for testing or custom implementations. No changes needed in consuming code.
+
+```dart
+// For testing — use mocks
+setUp(() {
+  EwaKitOverrides.httpClient = MockHttpClient();
+  EwaKitOverrides.connectivityChecker = MockConnectivityChecker();
+});
+tearDown(() {
+  EwaKitOverrides.reset();  // or EwaKitConfig.resetToDefaults()
+});
+
+// For custom implementation
+void main() {
+  EwaKitOverrides.httpClient = MyCustomHttpClient();
+  runApp(MyApp());
+}
+```
+
+Supported overrides: `EwaHttpClient`, `EwaConnectivityChecker`
+
 ## Best Practices
 
 To get the most out of EWA Kit, follow these best practices:
@@ -1897,6 +1954,7 @@ To get the most out of EWA Kit, follow these best practices:
 5. **Handle Errors Gracefully**: Implement proper error handling in HTTP clients
 6. **Use Logging**: Utilize `EwaLogger` for debugging and monitoring
 7. **Customize Responsibly**: Use customization options to match your brand, not to create inconsistency
+8. **Use Overrides for Tests**: Use `EwaKitOverrides` to inject mocks in unit/widget tests
 
 ## Support
 

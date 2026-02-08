@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ewa_kit/foundations/color/color.dart';
 import 'package:flutter/material.dart';
-import '../../foundations/color/ewa_color_foundation.dart';
 
 /// EWA Kit Image component with caching, placeholder, and error handling
 class EwaImage extends StatelessWidget {
@@ -135,6 +135,18 @@ class EwaImage extends StatelessWidget {
     );
   }
 
+  double _safeIconSize() {
+    final w = width;
+    final h = height;
+    double raw = 40.0;
+    if (w != null && w.isFinite && w > 0) {
+      raw = w * 0.3;
+    } else if (h != null && h.isFinite && h > 0) {
+      raw = h * 0.3;
+    }
+    return raw.isFinite && raw > 0 ? raw : 40.0;
+  }
+
   Widget _buildErrorWidget() {
     if (errorWidget != null) {
       return errorWidget!;
@@ -150,7 +162,7 @@ class EwaImage extends StatelessWidget {
       child: Icon(
         Icons.broken_image,
         color: Colors.white,
-        size: width != null ? width! * 0.3 : 40.0,
+        size: _safeIconSize(),
       ),
     );
   }

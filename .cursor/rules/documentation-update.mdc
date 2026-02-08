@@ -1,0 +1,70 @@
+---
+description: Update README and CHANGELOG when lib/ changes
+globs: lib/**/*.dart, lib/**
+alwaysApply: false
+---
+
+# Documentation Update Rule
+
+When you **add, modify, or remove** files in `lib/`, you **must** update:
+
+1. **CHANGELOG.md** — under `[Unreleased]`
+2. **README.md** — if it affects features, API, or structure
+
+---
+
+## CHANGELOG.md
+
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+Add entries under `## [Unreleased]` in the correct section:
+
+| Change type | Section | When to use |
+|-------------|---------|-------------|
+| New feature, component, API | `### Added` | New widget, helper, config option |
+| Behavior change, refactor | `### Changed` | Breaking or non-breaking behavior change |
+| Bug fix | `### Fixed` | Bug fixes |
+| Removed feature | `### Removed` | Deprecated or removed API |
+| Security fix | `### Security` | Security-related fixes |
+
+**Examples:**
+```
+### Added
+- `EwaConnectivityBanner` for overlay connectivity status
+
+### Changed
+- Moved `EwaConnectivityWidget` from utils to ui (structure refactor)
+
+### Fixed
+- EwaApp test flakiness with pumpAndSettle
+```
+
+---
+
+## README.md
+
+Update when changes affect **public API**, **features**, or **structure**:
+
+### Features list (around line 16–40)
+- Add new bullet for new components/utilities
+- Update existing bullet if behavior changes significantly
+
+### Table of Contents
+- Add/remove sections to match new or removed docs
+
+### Component / section content
+- Add usage examples for new components
+- Update code samples if API changed
+- Adjust import paths if exports changed (e.g. `utils/` → `ui/`)
+
+### Structure changes
+- If folders or exports change (e.g. widget moved from utils to ui), update any import examples and structure descriptions
+
+---
+
+## Checklist
+
+After editing `lib/`:
+
+- [ ] **CHANGELOG.md**: Added entry under `[Unreleased]`?
+- [ ] **README.md**: Features list, ToC, or usage updated if needed?

@@ -314,10 +314,8 @@ void main() {
       test('should have correct constant values', () {
         expect(EwaTextFieldConstants.defaultBorderRadius, 8.0);
         expect(EwaTextFieldConstants.borderWidth, 1.0);
-        expect(
-          EwaTextFieldConstants.defaultPadding,
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        );
+        expect(EwaTextFieldConstants.defaultPaddingHorizontal, 16.0);
+        expect(EwaTextFieldConstants.defaultPaddingVertical, 12.0);
       });
     });
   });

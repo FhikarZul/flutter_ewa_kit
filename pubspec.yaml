@@ -1,5 +1,5 @@
 name: ewa_kit
-description: "Template package for Flutter projects."
+description: "Flutter UI component library with design system, HTTP client, connectivity, and utilities for rapid app development."
 version: 0.0.1
 homepage: https://github.com/ewa-mobile/ewa_kit
 
