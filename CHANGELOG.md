@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `EwaTextField`: Optional `labelText`, `helperText`, `counterText`; improved error display (errorStyle, errorMaxLines)
 - `EwaTextField`: Optional `fillColor`, `enabledBorderColor`, `focusedBorderColor` for custom colors (falls back to variant when null)
 - Login Form example screen in example app (EwaTextField, EwaValidators, focus, loading state)
 - `EwaKitOverrides` for flexible dependency injection — override `EwaHttpClient` and `EwaConnectivityChecker` for testing or custom implementations
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `EwaToast`: Smoother hide animation (fade + slide, easeOutCubic, 350ms)
 - `EwaTextField`: Logging follows Flutter `kDebugMode` (auto in debug, off in release)
 - `EwaTextField`: Content padding now responsive (uses `.w` and `.h`)
 - `EwaTextField`: Added `focusNode`, `autofocus`, `maxLength`, `textCapitalization`, `inputFormatters`

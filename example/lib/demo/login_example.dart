@@ -96,7 +96,8 @@ class _LoginExampleScreenState extends State<LoginExampleScreen> {
                 SizedBox(height: 40.h),
                 EwaTextField.primary(
                   controller: _emailController,
-                  hintText: 'Email',
+                  labelText: 'Email',
+                  hintText: 'contoh@email.com',
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   prefixIcon: Icon(Icons.email_outlined, size: 20.sp),
@@ -113,7 +114,9 @@ class _LoginExampleScreenState extends State<LoginExampleScreen> {
                 EwaTextField.primary(
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
-                  hintText: 'Password',
+                  labelText: 'Password',
+                  hintText: 'Minimal 6 karakter',
+                  helperText: 'Gunakan kombinasi huruf dan angka',
                   obscureText: _obscurePassword,
                   keyboardType: TextInputType.visiblePassword,
                   textInputAction: TextInputAction.done,

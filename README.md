@@ -1419,7 +1419,10 @@ EwaButton(
 EwaTextField(
   controller: controller,              // Optional: TextEditingController
   focusNode: focusNode,                // Optional: FocusNode (e.g. for next-field focus)
+  labelText: 'Field label',            // Optional: Floating label
   hintText: 'Placeholder text',        // Optional: Placeholder text
+  helperText: 'Helper text below',     // Optional: Helper text
+  counterText: '0/100',                // Optional: Override counter ('' to hide when maxLength set)
   variant: EwaTextFieldVariant.primary,// Optional: TextField variant
   borderRadius: 8.0,                   // Optional: Custom border radius
   fillColor: Colors.grey.shade100,     // Optional: Override background (use EwaColorFoundation for dark mode)

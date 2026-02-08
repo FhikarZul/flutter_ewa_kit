@@ -38,7 +38,10 @@ class EwaTextField extends StatefulWidget {
   const EwaTextField({
     this.controller,
     this.focusNode,
+    this.labelText,
     this.hintText,
+    this.helperText,
+    this.counterText,
     this.variant = EwaTextFieldVariant.primary,
     this.borderRadius = EwaTextFieldConstants.defaultBorderRadius,
     this.fillColor,
@@ -68,7 +71,10 @@ class EwaTextField extends StatefulWidget {
   factory EwaTextField.primary({
     TextEditingController? controller,
     FocusNode? focusNode,
+    String? labelText,
     String? hintText,
+    String? helperText,
+    String? counterText,
     double borderRadius = EwaTextFieldConstants.defaultBorderRadius,
     Color? fillColor,
     Color? enabledBorderColor,
@@ -93,7 +99,10 @@ class EwaTextField extends StatefulWidget {
   }) => EwaTextField(
     controller: controller,
     focusNode: focusNode,
+    labelText: labelText,
     hintText: hintText,
+    helperText: helperText,
+    counterText: counterText,
     variant: EwaTextFieldVariant.primary,
     borderRadius: borderRadius,
     fillColor: fillColor,
@@ -122,7 +131,10 @@ class EwaTextField extends StatefulWidget {
   factory EwaTextField.secondary({
     TextEditingController? controller,
     FocusNode? focusNode,
+    String? labelText,
     String? hintText,
+    String? helperText,
+    String? counterText,
     double borderRadius = EwaTextFieldConstants.defaultBorderRadius,
     Color? fillColor,
     Color? enabledBorderColor,
@@ -147,7 +159,10 @@ class EwaTextField extends StatefulWidget {
   }) => EwaTextField(
     controller: controller,
     focusNode: focusNode,
+    labelText: labelText,
     hintText: hintText,
+    helperText: helperText,
+    counterText: counterText,
     variant: EwaTextFieldVariant.secondary,
     borderRadius: borderRadius,
     fillColor: fillColor,
@@ -176,7 +191,10 @@ class EwaTextField extends StatefulWidget {
   factory EwaTextField.tertiary({
     TextEditingController? controller,
     FocusNode? focusNode,
+    String? labelText,
     String? hintText,
+    String? helperText,
+    String? counterText,
     double borderRadius = EwaTextFieldConstants.defaultBorderRadius,
     Color? fillColor,
     Color? enabledBorderColor,
@@ -201,7 +219,10 @@ class EwaTextField extends StatefulWidget {
   }) => EwaTextField(
     controller: controller,
     focusNode: focusNode,
+    labelText: labelText,
     hintText: hintText,
+    helperText: helperText,
+    counterText: counterText,
     variant: EwaTextFieldVariant.tertiary,
     borderRadius: borderRadius,
     fillColor: fillColor,
@@ -230,7 +251,10 @@ class EwaTextField extends StatefulWidget {
   factory EwaTextField.danger({
     TextEditingController? controller,
     FocusNode? focusNode,
+    String? labelText,
     String? hintText,
+    String? helperText,
+    String? counterText,
     double borderRadius = EwaTextFieldConstants.defaultBorderRadius,
     Color? fillColor,
     Color? enabledBorderColor,
@@ -255,7 +279,10 @@ class EwaTextField extends StatefulWidget {
   }) => EwaTextField(
     controller: controller,
     focusNode: focusNode,
+    labelText: labelText,
     hintText: hintText,
+    helperText: helperText,
+    counterText: counterText,
     variant: EwaTextFieldVariant.danger,
     borderRadius: borderRadius,
     fillColor: fillColor,
@@ -282,7 +309,10 @@ class EwaTextField extends StatefulWidget {
 
   final TextEditingController? controller;
   final FocusNode? focusNode;
+  final String? labelText;
   final String? hintText;
+  final String? helperText;
+  final String? counterText;
   final EwaTextFieldVariant variant;
   final double borderRadius;
   final Color? fillColor;
@@ -441,8 +471,21 @@ class _EwaTextFieldState extends State<EwaTextField> {
       textInputAction: widget.textInputAction,
       style: TextStyle(color: variantData.textColor, fontSize: fontSize),
       decoration: InputDecoration(
+        labelText: widget.labelText,
         hintText: widget.hintText,
         hintStyle: TextStyle(color: variantData.hintColor, fontSize: fontSize),
+        helperText: widget.helperText,
+        helperStyle: TextStyle(
+          color: variantData.hintColor,
+          fontSize: (fontSize * 0.875).clamp(10.0, 14.0),
+        ),
+        helperMaxLines: 2,
+        counterText: widget.counterText,
+        errorStyle: TextStyle(
+          color: EwaColorFoundation.getError(context),
+          fontSize: (fontSize * 0.875).clamp(10.0, 14.0),
+        ),
+        errorMaxLines: 2,
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.suffixIcon,
         filled: true,

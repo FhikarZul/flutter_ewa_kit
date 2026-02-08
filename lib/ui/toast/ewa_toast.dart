@@ -131,22 +131,27 @@ class _ToastWidgetState extends State<_ToastWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
   bool _isDismissed = false;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 350),
       vsync: this,
     );
 
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero).animate(
-          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
         );
 
-    // Start animation
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
+    // Start enter animation
     _animationController.forward();
 
     // Schedule auto dismissal
@@ -164,6 +169,7 @@ class _ToastWidgetState extends State<_ToastWidget>
     if (_isDismissed || !mounted) return;
     _isDismissed = true;
 
+    // Smooth exit: reverse slide + fade (both use same controller)
     _animationController.reverse().then((_) {
       if (mounted) widget.onDismiss();
     });
@@ -181,8 +187,17 @@ class _ToastWidgetState extends State<_ToastWidget>
       left: 16.w,
       right: 16.w,
       child: SafeArea(
-        child: SlideTransition(
-          position: _slideAnimation,
+        child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return Opacity(
+              opacity: _fadeAnimation.value,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: child,
+              ),
+            );
+          },
           child: Material(
             color: Colors.transparent,
             child: Container(
@@ -244,7 +259,7 @@ class _ToastWidgetState extends State<_ToastWidget>
     );
   }
 
-  /// Get background color based on toast type (theme-aware)
+  /// Get background color based on toast type
   Color _getBackgroundColor(BuildContext context) {
     if (widget.backgroundColor != null) {
       return widget.backgroundColor!;
