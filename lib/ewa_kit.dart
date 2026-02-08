@@ -6,6 +6,7 @@ export 'ui/permission/permission.dart';
 export 'ui/image/image.dart';
 export 'ui/lazy_load/lazy_load.dart';
 export 'ui/loading/loading.dart';
+export 'ui/select/select.dart';
 export 'ui/textfield/textfield.dart';
 export 'ui/toast/toast.dart';
 export 'ui/typography/typography.dart';

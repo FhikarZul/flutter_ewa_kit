@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `EwaSelect` — select/dropdown component with static items or lazy load mode; `itemCountNotifier` for reactive updates in lazy modal
+- `EwaSelectItem<T>` — data class for select options
 - `EwaTextField`: Optional `labelText`, `helperText`, `counterText`; improved error display (errorStyle, errorMaxLines)
 - `EwaTextField`: Optional `fillColor`, `enabledBorderColor`, `focusedBorderColor` for custom colors (falls back to variant when null)
 - Login Form example screen in example app (EwaTextField, EwaValidators, focus, loading state)
@@ -23,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `EwaSelect`: Label rendered above field (no overlap); lazy load requires `itemCountNotifier` for modal to show new items
 - `EwaToast`: Smoother hide animation (fade + slide, easeOutCubic, 350ms)
 - `EwaTextField`: Logging follows Flutter `kDebugMode` (auto in debug, off in release)
 - `EwaTextField`: Content padding now responsive (uses `.w` and `.h`)

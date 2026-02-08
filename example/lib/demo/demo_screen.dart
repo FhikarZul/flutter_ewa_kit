@@ -8,6 +8,7 @@ import 'image_example.dart';
 import 'lazy_load_example.dart';
 import 'login_example.dart';
 import 'permission_example.dart';
+import 'select_example.dart';
 
 class DemoScreen extends StatefulWidget {
   final VoidCallback? onThemeToggle;
@@ -22,6 +23,7 @@ class _DemoScreenState extends State<DemoScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String? _selectedCountry;
 
   @override
   void dispose() {
@@ -163,6 +165,22 @@ class _DemoScreenState extends State<DemoScreen> {
                         (v == null || v.length < 6)
                             ? 'Min 6 characters'
                             : null,
+                  ),
+                ],
+              ),
+              _Section(
+                title: 'Select',
+                children: [
+                  EwaSelect<String>(
+                    labelText: 'Country',
+                    hintText: 'Pilih negara',
+                    items: const [
+                      EwaSelectItem(value: 'id', label: 'Indonesia'),
+                      EwaSelectItem(value: 'my', label: 'Malaysia'),
+                      EwaSelectItem(value: 'sg', label: 'Singapore'),
+                    ],
+                    value: _selectedCountry,
+                    onChanged: (v) => setState(() => _selectedCountry = v),
                   ),
                 ],
               ),
@@ -341,6 +359,13 @@ class _DemoScreenState extends State<DemoScreen> {
                     label: 'Login Form Demo',
                     onPressed: () async {
                       _navigateTo(const LoginExampleScreen());
+                    },
+                  ),
+                  SizedBox(height: 8.h),
+                  EwaButton.primary(
+                    label: 'Select Demo (Static & Lazy)',
+                    onPressed: () async {
+                      _navigateTo(const SelectExampleScreen());
                     },
                   ),
                   SizedBox(height: 8.h),

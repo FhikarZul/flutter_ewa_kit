@@ -26,6 +26,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
 - ✅ **Built-in Validators** - Reusable validation functions for form fields with customizable error messages
 - 💰 **Currency Formatter** - Robust Indonesian currency formatting for financial applications
 - 🗓️ **DateTime Converter** - Comprehensive date/time parsing and formatting with Indonesian localization
+- 📋 **Select/Dropdown** - Static or lazy-load options with bottom sheet UI
 - 📋 **Dialog Components** - Alert, confirmation, and custom dialogs
 - 📝 **Toast Notifications** - Success, error, info, and warning notifications
 - ⏳ **Loading Indicators** - Multiple animated loading components
@@ -46,6 +47,7 @@ EWA Kit provides a complete set of pre-built, customizable UI components and uti
 - [Components](#components)
   - [Buttons](#buttons)
   - [TextFields](#textfields)
+  - [Select](#select)
   - [Dialogs](#dialogs)
   - [Toast Notifications](#toast-notifications)
   - [Loading Indicators](#loading-indicators)
@@ -621,6 +623,49 @@ EwaTextField.primary(
 ```
 
 The currency formatter is designed to be crash-safe and handles various edge cases in numeric input formatting. It automatically extracts digits from input and formats them according to the specified currency standards.
+
+### Select
+
+A select/dropdown component that supports both **static items** and **lazy loading**.
+
+#### Static mode
+
+```dart
+EwaSelect<String>(
+  labelText: 'Country',
+  hintText: 'Pilih negara',
+  items: const [
+    EwaSelectItem(value: 'id', label: 'Indonesia'),
+    EwaSelectItem(value: 'my', label: 'Malaysia'),
+    EwaSelectItem(value: 'sg', label: 'Singapore'),
+  ],
+  value: selectedValue,
+  onChanged: (v) => setState(() => selectedValue = v),
+)
+```
+
+#### Lazy load mode
+
+Load options on demand when the user scrolls. Use `itemCountNotifier` so the modal updates when more items are loaded:
+
+```dart
+final _itemCountNotifier = ValueNotifier(0);
+
+EwaSelect<String>.lazy(
+  labelText: 'Item',
+  itemCount: items.length,
+  itemCountNotifier: _itemCountNotifier,
+  itemBuilder: (context, index) => EwaSelectItem(value: items[index].id, label: items[index].name),
+  onLoadMore: () async {
+    await loadNextPage();
+    _itemCountNotifier.value = items.length;  // Trigger modal rebuild
+  },
+  isLoading: isLoading,
+  value: selectedValue,
+  selectedLabel: selectedLabel,
+  onChanged: (v) => ...,
+)
+```
 
 ### Dialogs
 
