@@ -58,6 +58,7 @@ class EwaSelect<T> extends StatelessWidget {
     this.validator,
     this.emptyMessage,
     this.itemCountNotifier,
+    this.isLoadingNotifier,
     super.key,
   })  : itemCount = null,
         itemBuilder = null,
@@ -84,6 +85,7 @@ class EwaSelect<T> extends StatelessWidget {
     this.validator,
     this.emptyMessage = 'Tidak ada data',
     this.itemCountNotifier,
+    this.isLoadingNotifier,
     super.key,
   })  : items = null;
 
@@ -101,6 +103,7 @@ class EwaSelect<T> extends StatelessWidget {
   final String? labelText;
   final String? helperText;
   final ValueNotifier<int>? itemCountNotifier;
+  final ValueNotifier<bool>? isLoadingNotifier;
   final bool enabled;
   final EwaTextFieldVariant variant;
   final double borderRadius;
@@ -345,6 +348,7 @@ class EwaSelect<T> extends StatelessWidget {
       builder: (ctx) => _LazySelectContent<T>(
         itemCount: itemCount!,
         itemCountNotifier: itemCountNotifier,
+        isLoadingNotifier: isLoadingNotifier,
         itemBuilder: itemBuilder!,
         onLoadMore: onLoadMore!,
         isLoading: isLoading ?? false,
@@ -386,6 +390,7 @@ class _LazySelectContent<T> extends StatefulWidget {
   const _LazySelectContent({
     required this.itemCount,
     this.itemCountNotifier,
+    this.isLoadingNotifier,
     required this.itemBuilder,
     required this.onLoadMore,
     required this.isLoading,
@@ -397,6 +402,7 @@ class _LazySelectContent<T> extends StatefulWidget {
 
   final int itemCount;
   final ValueNotifier<int>? itemCountNotifier;
+  final ValueNotifier<bool>? isLoadingNotifier;
   final EwaSelectItem<T> Function(BuildContext context, int index) itemBuilder;
   final Future<void> Function() onLoadMore;
   final bool isLoading;
@@ -426,7 +432,7 @@ class _LazySelectContentState<T> extends State<_LazySelectContent<T>> {
   }
 
   void _onScroll() {
-    if (!_scrollController.hasClients || widget.isLoading) return;
+    if (!_scrollController.hasClients || _isLoading) return;
     final pos = _scrollController.position;
     if (pos.pixels >= pos.maxScrollExtent - 80) {
       widget.onLoadMore();
@@ -467,7 +473,7 @@ class _LazySelectContentState<T> extends State<_LazySelectContent<T>> {
             ),
           ],
           Flexible(
-            child: count == 0 && !widget.isLoading
+            child: count == 0 && !_isLoading
                 ? Padding(
                     padding: EdgeInsets.all(24.r),
                     child: Text(
@@ -478,7 +484,7 @@ class _LazySelectContentState<T> extends State<_LazySelectContent<T>> {
                 : ListView.builder(
                     controller: _scrollController,
                     shrinkWrap: true,
-                    itemCount: count + (widget.isLoading ? 1 : 0),
+                    itemCount: count + (_isLoading ? 1 : 0),
                     itemBuilder: (ctx, i) {
                       if (i >= count) {
                         return Padding(
@@ -502,14 +508,22 @@ class _LazySelectContentState<T> extends State<_LazySelectContent<T>> {
     );
   }
 
+  bool get _isLoading => widget.isLoadingNotifier?.value ?? widget.isLoading;
+
   @override
   Widget build(BuildContext context) {
-    if (widget.itemCountNotifier != null) {
-      return ValueListenableBuilder<int>(
-        valueListenable: widget.itemCountNotifier!,
-        builder: (context, count, _) => _buildContent(count),
-      );
+    final listenables = <Listenable>[
+      if (widget.itemCountNotifier != null) widget.itemCountNotifier!,
+      if (widget.isLoadingNotifier != null) widget.isLoadingNotifier!,
+    ];
+    if (listenables.isEmpty) {
+      return _buildContent(widget.itemCount);
     }
-    return _buildContent(widget.itemCount);
+    return ListenableBuilder(
+      listenable: Listenable.merge(listenables),
+      builder: (context, _) => _buildContent(
+        widget.itemCountNotifier?.value ?? widget.itemCount,
+      ),
+    );
   }
 }

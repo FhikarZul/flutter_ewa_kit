@@ -16,6 +16,7 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
   String? _lazyLabel;
   final List<EwaSelectItem<int>> _lazyItems = [];
   final ValueNotifier<int> _lazyItemCount = ValueNotifier(0);
+  final ValueNotifier<bool> _lazyLoadingNotifier = ValueNotifier(false);
   int _lazyPage = 1;
   bool _lazyLoading = false;
   static const int _pageSize = 10;
@@ -24,6 +25,7 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
   Future<void> _loadLazyPage() async {
     if (_lazyLoading) return;
     _lazyLoading = true;
+    _lazyLoadingNotifier.value = true;
     setState(() {});
 
     await Future.delayed(const Duration(milliseconds: 500));
@@ -38,6 +40,7 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
     }
 
     _lazyLoading = false;
+    _lazyLoadingNotifier.value = false;
     _lazyItemCount.value = _lazyItems.length;
     setState(() {});
   }
@@ -51,6 +54,7 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
   @override
   void dispose() {
     _lazyItemCount.dispose();
+    _lazyLoadingNotifier.dispose();
     super.dispose();
   }
 
@@ -93,6 +97,7 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
               helperText: 'Scroll untuk load more',
               itemCount: _lazyItems.length,
               itemCountNotifier: _lazyItemCount,
+              isLoadingNotifier: _lazyLoadingNotifier,
               itemBuilder: (context, index) => _lazyItems[index],
               onLoadMore: _loadLazyPage,
               isLoading: _lazyLoading,
