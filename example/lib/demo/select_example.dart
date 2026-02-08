@@ -14,6 +14,7 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
   String? _staticValue;
   int? _lazyValue;
   String? _lazyLabel;
+  String _lazySearchQuery = '';
   final List<EwaSelectItem<int>> _lazyItems = [];
   final ValueNotifier<int> _lazyItemCount = ValueNotifier(0);
   final ValueNotifier<bool> _lazyLoadingNotifier = ValueNotifier(false);
@@ -21,6 +22,12 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
   bool _lazyLoading = false;
   static const int _pageSize = 10;
   static const int _totalItems = 50;
+
+  List<EwaSelectItem<int>> get _filteredLazyItems {
+    final q = _lazySearchQuery.trim().toLowerCase();
+    if (q.isEmpty) return _lazyItems;
+    return _lazyItems.where((i) => i.label.toLowerCase().contains(q)).toList();
+  }
 
   Future<void> _loadLazyPage() async {
     if (_lazyLoading) return;
@@ -41,7 +48,7 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
 
     _lazyLoading = false;
     _lazyLoadingNotifier.value = false;
-    _lazyItemCount.value = _lazyItems.length;
+    _lazyItemCount.value = _filteredLazyItems.length;
     setState(() {});
   }
 
@@ -76,7 +83,8 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
             EwaSelect<String>(
               labelText: 'Country',
               hintText: 'Pilih negara',
-              helperText: 'Contoh dengan daftar statis',
+              helperText: 'Contoh dengan daftar statis + search',
+              searchHint: 'Cari negara...',
               items: const [
                 EwaSelectItem(value: 'id', label: 'Indonesia'),
                 EwaSelectItem(value: 'my', label: 'Malaysia'),
@@ -94,11 +102,18 @@ class _SelectExampleScreenState extends State<SelectExampleScreen> {
             EwaSelect<int>.lazy(
               labelText: 'Item (50 total)',
               hintText: 'Pilih item',
-              helperText: 'Scroll untuk load more',
-              itemCount: _lazyItems.length,
+              helperText: 'Scroll untuk load more. Ketik untuk filter client-side',
+              searchHint: 'Cari item...',
+              onSearch: (q) {
+                setState(() {
+                  _lazySearchQuery = q;
+                  _lazyItemCount.value = _filteredLazyItems.length;
+                });
+              },
+              itemCount: _filteredLazyItems.length,
               itemCountNotifier: _lazyItemCount,
               isLoadingNotifier: _lazyLoadingNotifier,
-              itemBuilder: (context, index) => _lazyItems[index],
+              itemBuilder: (context, index) => _filteredLazyItems[index],
               onLoadMore: _loadLazyPage,
               isLoading: _lazyLoading,
               value: _lazyValue,

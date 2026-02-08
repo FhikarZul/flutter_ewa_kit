@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:ewa_kit/foundations/color/ewa_color_foundation.dart';
 import 'package:ewa_kit/ui/loading/loading.dart';
 import 'package:ewa_kit/ui/select/ewa_select_item.dart';
+import 'package:ewa_kit/ui/textfield/ewa_textfield.dart';
 import 'package:ewa_kit/ui/textfield/enums/ewa_textfield_variant.dart';
 import 'package:ewa_kit/ui/typography/typography.dart';
 import 'package:flutter/material.dart';
@@ -59,12 +62,14 @@ class EwaSelect<T> extends StatelessWidget {
     this.emptyMessage,
     this.itemCountNotifier,
     this.isLoadingNotifier,
+    this.searchHint,
     super.key,
   })  : itemCount = null,
         itemBuilder = null,
         onLoadMore = null,
         isLoading = null,
-        selectedLabel = null;
+        selectedLabel = null,
+        onSearch = null;
 
   /// Creates a select with lazy loading.
   const EwaSelect.lazy({
@@ -86,6 +91,8 @@ class EwaSelect<T> extends StatelessWidget {
     this.emptyMessage = 'Tidak ada data',
     this.itemCountNotifier,
     this.isLoadingNotifier,
+    this.searchHint,
+    this.onSearch,
     super.key,
   })  : items = null;
 
@@ -110,6 +117,15 @@ class EwaSelect<T> extends StatelessWidget {
   final Widget? prefixIcon;
   final String? Function(T?)? validator;
   final String? emptyMessage;
+
+  /// Hint text for search bar. When non-null, a search bar is shown in the modal.
+  /// Static mode: filters items by label (client-side).
+  /// Lazy mode: calls [onSearch] when text changes (server-side).
+  final String? searchHint;
+
+  /// For lazy mode only. Called when search text changes (debounced ~300ms).
+  /// Parent should reload data with the query and update itemCount/itemCountNotifier.
+  final void Function(String query)? onSearch;
 
   bool get _isLazy => itemBuilder != null && onLoadMore != null;
 
@@ -279,63 +295,17 @@ class EwaSelect<T> extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (ctx) => Container(
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.6),
-        decoration: BoxDecoration(
-          color: EwaColorFoundation.resolveColor(
-            context,
-            EwaColorFoundation.neutral50,
-            EwaColorFoundation.neutral900,
-          ),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: EdgeInsets.only(top: 12.h),
-              width: 40.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: EwaColorFoundation.resolveColor(
-                  context,
-                  EwaColorFoundation.neutral300,
-                  EwaColorFoundation.neutral600,
-                ),
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-            if (labelText != null) ...[
-              Padding(
-                padding: EdgeInsets.all(16.r),
-                child: Text(labelText!, style: EwaTypography.headingSm()),
-              ),
-            ],
-            Flexible(
-              child: options.isEmpty
-                  ? Padding(
-                      padding: EdgeInsets.all(24.r),
-                      child: Text(
-                        emptyMessage ?? 'Tidak ada data',
-                        style: EwaTypography.bodySm(),
-                      ),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: options.length,
-                      itemBuilder: (ctx, i) => _OptionTile<T>(
-                        item: options[i],
-                        isSelected: options[i].value == value,
-                        onTap: () {
-                          formState.didChange(options[i].value);
-                          onChanged(options[i].value);
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                    ),
-            ),
-          ],
-        ),
+      builder: (ctx) => _StaticSelectContent<T>(
+        options: options,
+        value: value,
+        onSelected: (v) {
+          formState.didChange(v);
+          onChanged(v);
+          Navigator.pop(ctx);
+        },
+        labelText: labelText,
+        emptyMessage: emptyMessage,
+        searchHint: searchHint,
       ),
     );
   }
@@ -360,7 +330,134 @@ class EwaSelect<T> extends StatelessWidget {
         },
         labelText: labelText,
         emptyMessage: emptyMessage,
+        searchHint: searchHint,
+        onSearch: onSearch,
       ),
+    );
+  }
+}
+
+class _StaticSelectContent<T> extends StatefulWidget {
+  const _StaticSelectContent({
+    required this.options,
+    required this.value,
+    required this.onSelected,
+    this.labelText,
+    this.emptyMessage,
+    this.searchHint,
+  });
+
+  final List<EwaSelectItem<T>> options;
+  final T? value;
+  final ValueChanged<T?> onSelected;
+  final String? labelText;
+  final String? emptyMessage;
+  final String? searchHint;
+
+  @override
+  State<_StaticSelectContent<T>> createState() => _StaticSelectContentState<T>();
+}
+
+class _StaticSelectContentState<T> extends State<_StaticSelectContent<T>> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<EwaSelectItem<T>> get _filteredOptions {
+    final q = _searchController.text.trim().toLowerCase();
+    if (q.isEmpty) return widget.options;
+    return widget.options
+        .where((i) => i.label.toLowerCase().contains(q))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _searchController,
+      builder: (context, _) {
+        final filtered = _filteredOptions;
+        return Container(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+          decoration: BoxDecoration(
+            color: EwaColorFoundation.resolveColor(
+              context,
+              EwaColorFoundation.neutral50,
+              EwaColorFoundation.neutral900,
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: EdgeInsets.only(top: 12.h),
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: EwaColorFoundation.resolveColor(
+                    context,
+                    EwaColorFoundation.neutral300,
+                    EwaColorFoundation.neutral600,
+                  ),
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              if (widget.labelText != null) ...[
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16.r, 16.r, 16.r, 0),
+                  child: Text(widget.labelText!, style: EwaTypography.headingSm()),
+                ),
+              ],
+              if (widget.searchHint != null) ...[
+                Padding(
+                  padding: EdgeInsets.all(16.r),
+                  child: EwaTextField(
+                    controller: _searchController,
+                    hintText: widget.searchHint!,
+                    borderRadius: 12,
+                    prefixIcon: Icon(Icons.search, size: 20.sp, color: EwaColorFoundation.neutral500),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear, size: 20.sp, color: EwaColorFoundation.neutral500),
+                            onPressed: () => _searchController.clear(),
+                          )
+                        : null,
+                    onChanged: (_) {},
+                  ),
+                ),
+              ] else if (widget.labelText != null)
+                SizedBox(height: 16.h),
+              Flexible(
+                child: filtered.isEmpty
+                    ? Padding(
+                        padding: EdgeInsets.all(24.r),
+                        child: Text(
+                          widget.emptyMessage ?? 'Tidak ada data',
+                          style: EwaTypography.bodySm(),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filtered.length,
+                        itemBuilder: (ctx, i) {
+                          final item = filtered[i];
+                          return _OptionTile<T>(
+                            item: item,
+                            isSelected: item.value == widget.value,
+                            onTap: () => widget.onSelected(item.value),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -398,6 +495,8 @@ class _LazySelectContent<T> extends StatefulWidget {
     required this.onSelected,
     this.labelText,
     this.emptyMessage,
+    this.searchHint,
+    this.onSearch,
   });
 
   final int itemCount;
@@ -410,6 +509,8 @@ class _LazySelectContent<T> extends StatefulWidget {
   final ValueChanged<T?> onSelected;
   final String? labelText;
   final String? emptyMessage;
+  final String? searchHint;
+  final void Function(String query)? onSearch;
 
   @override
   State<_LazySelectContent<T>> createState() => _LazySelectContentState<T>();
@@ -417,18 +518,33 @@ class _LazySelectContent<T> extends StatefulWidget {
 
 class _LazySelectContentState<T> extends State<_LazySelectContent<T>> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    if (widget.searchHint != null && widget.onSearch != null) {
+      _searchController.addListener(_onSearchChanged);
+    }
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      widget.onSearch?.call(_searchController.text.trim());
+    });
   }
 
   void _onScroll() {
@@ -468,10 +584,32 @@ class _LazySelectContentState<T> extends State<_LazySelectContent<T>> {
           ),
           if (widget.labelText != null) ...[
             Padding(
-              padding: EdgeInsets.all(16.r),
+              padding: EdgeInsets.fromLTRB(16.r, 16.r, 16.r, 0),
               child: Text(widget.labelText!, style: EwaTypography.headingSm()),
             ),
           ],
+          if (widget.searchHint != null && widget.onSearch != null) ...[
+            Padding(
+              padding: EdgeInsets.all(16.r),
+              child: EwaTextField(
+                controller: _searchController,
+                hintText: widget.searchHint!,
+                borderRadius: 12,
+                prefixIcon: Icon(Icons.search, size: 20.sp, color: EwaColorFoundation.neutral500),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear, size: 20.sp, color: EwaColorFoundation.neutral500),
+                        onPressed: () {
+                          _searchController.clear();
+                          widget.onSearch?.call('');
+                        },
+                      )
+                    : null,
+                onChanged: (_) {},
+              ),
+            ),
+          ] else if (widget.labelText != null)
+            SizedBox(height: 16.h),
           Flexible(
             child: count == 0 && !_isLoading
                 ? Padding(
@@ -515,6 +653,7 @@ class _LazySelectContentState<T> extends State<_LazySelectContent<T>> {
     final listenables = <Listenable>[
       if (widget.itemCountNotifier != null) widget.itemCountNotifier!,
       if (widget.isLoadingNotifier != null) widget.isLoadingNotifier!,
+      if (widget.searchHint != null && widget.onSearch != null) _searchController,
     ];
     if (listenables.isEmpty) {
       return _buildContent(widget.itemCount);
